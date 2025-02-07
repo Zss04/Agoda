@@ -1,0 +1,6 @@
+pytest
+pytest-asyncio
+playwright
+pep8
+flake8
+asyncio
