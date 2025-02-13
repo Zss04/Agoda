@@ -1,29 +1,22 @@
 Project Title
-Simple overview of use/purpose.
-
+Agoda trip flight unit test 
 Description
-An in-depth paragraph about your project and overview of use.
-
+This test checks the round trip option in the flight tab and different features in the flight tab
 Getting Started
 Dependencies
-Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-ex. Windows 10
+This uses pytest and playwright. To run the test cases please install the chromium browser in playwright and use pytest in the terminal.
+
 Installing
-How/where to download your program
-Any modifications needed to be made to files/folders
+# How/where to download your program
+# Any modifications needed to be made to files/folders
 Executing program
-How to run the program
+<!-- How to run the program
 Step-by-step bullets
-code blocks for commands
-Help
-Any advise for common problems or issues.
+code blocks for commands -->
 
-command to run if program contains helper info
-Authors
-Contributors names and contact info
+Contributors
+Naveed Saleem (naveed.saleem@arbisoft.com)
 
-ex. Dominique Pizzie
-ex. @DomPizzie
 
 Version History
 0.2
@@ -31,14 +24,5 @@ Various bug fixes and optimizations
 See commit change or See release history
 0.1
 Initial Release
-License
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
 
-Acknowledgments
-Inspiration, code snippets, etc.
 
-awesome-readme
-PurpleBooth
-dbader
-zenorocha
-fvcproductions
