@@ -1,0 +1,8 @@
+from playwright.async_api import Page
+from datetime import datetime
+import pytest
+
+class Trip_options:
+    def __init__(self, page: Page): # This is so we dont have to pass page everytime
+        self.page = page            # stores page value in instance created 
+    
