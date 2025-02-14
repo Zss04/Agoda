@@ -1,6 +1,7 @@
 import pytest
 from playwright.async_api import async_playwright
 from flightinfo import test_flightInfo
+from tabulate import tabulate
 
 '''
 @pytest.mark.asyncio
@@ -19,9 +20,10 @@ async def test_flight_data(page):
     page, search_url = page
     trip = test_flightInfo(page)
     await page.goto(search_url["url"])
-    store_flight_data = await trip.flight_data()
-    print("Flights are visible")
+    flight_data_2d = await trip.flight_data() # Call flight_data on the instance
 
-    assert len(store_flight_data) > 0, "No flights found!"
-    return store_flight_data
+
+    print("\nFlight Data (2D Array):")
+    print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))
+    assert len(flight_data_2d) > 0, "No flights found!"
    

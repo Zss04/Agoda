@@ -15,6 +15,14 @@ class PlaywrightHelper:
             print(f"Warning: Did not find element '{selector}'")
             return None
 
+    async def get_element_scoped(self, parent_locator, selector, timeout=5000):
+        try:
+            await parent_locator.wait_for_selector(selector, timeout=timeout)
+            return parent_locator.locator(selector)
+        except Exception as err:
+            print(f"Warning: Did not find element '{selector}' within parent")
+            return None
+    
     async def wait1(self):
         try:
             await self.page.wait_for_timeout(1000)

@@ -125,7 +125,7 @@ class test_flightInfo:
         flights = await self.helper.get_element("//div[@data-testid='web-refresh-flights-card']") # check all flight options
         count = await flights.count()   # get count
         print(f"Found {count} flights")
-        flight_data = []
+        flight_data_2d = [["Carrier", "Duration", "Price"]]
         
 
         for i in range (count):
@@ -144,13 +144,6 @@ class test_flightInfo:
                 "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
             currency = await currency_loc.inner_text()
 
-            flight_info = {
-            "carrier": carrier.strip(),
-            "duration": duration.strip(),
-            "price": price.strip(),
-            "currency": currency.strip()
-            }
+            flight_data_2d.append([carrier.strip(), duration.strip(), f"{price.strip()} {currency.strip()}"])
 
-            print(f"Flight {i+1}: {flight_info}")
-            flight_data.append(flight_info)
-        return flight_data
+        return flight_data_2d
