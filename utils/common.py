@@ -14,7 +14,7 @@ class PlaywrightHelper:
         except Exception as err:                                           # gives warning if get element fails
             print(f"Warning: Did not find element '{selector}'")
             return None
-        
+
     async def wait1(self):
         try:
             await self.page.wait_for_timeout(1000)
