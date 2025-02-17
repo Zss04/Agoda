@@ -1,4 +1,4 @@
 .pytest_cache/
 .DS_Store/
 .vscode/
-.venv/
+venv/

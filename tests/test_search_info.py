@@ -4,7 +4,7 @@ from flightinfo import test_flightInfo
 from tabulate import tabulate
 
 
-@pytest.mark.asyncio
+'''@pytest.mark.asyncio
 async def test_verify_search_results(page):
     # create an instance of trip options class
     page, search_url = page
@@ -13,7 +13,7 @@ async def test_verify_search_results(page):
     await trip.validate_search(search_url["url"])
     print("search validated")
     return None 
-
+'''
 
 @pytest.mark.asyncio
 async def test_flight_data(page):

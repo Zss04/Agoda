@@ -122,25 +122,22 @@ class test_flightInfo:
     async def flight_data(self):
             
         await self.page.wait_for_selector("//div[@data-testid='web-refresh-flights-card']")
-        flights = await self.helper.get_element("//div[@data-testid='web-refresh-flights-card']") # check all flight options
-        count = await flights.count()   # get count
-        print(f"Found {count} flights")
+        flight_loc = await self.helper.get_element("//div[@data-testid='web-refresh-flights-card']") # check all flight options
         flight_data_2d = [["Carrier", "Duration", "Price"]]
         
 
-        for i in range (count):
-            flight = flights.nth(i)
+        for flight in flight_loc:
             # carrier_loc = await self.helper.get_element(flight, "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']") 
-            carrier_loc = flight.locator(
+            carrier_loc = await self.helper.get_element(
                 "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']") 
             carrier = await carrier_loc.inner_text()
-            duration_loc = flight.locator(
+            duration_loc = await self.helper.get_element(
                 "//div[@data-testid='flightCard-flight-detail']//span[@data-testid='duration']")
             duration = await duration_loc.inner_text()
-            price_loc = flight.locator(
+            price_loc = await self.helper.get_element(
                 "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP bEtAca kkhXWj']")
             price = await price_loc.inner_text()
-            currency_loc = flight.locator(
+            currency_loc = await self.helper.get_element(
                 "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
             currency = await currency_loc.inner_text()
 
