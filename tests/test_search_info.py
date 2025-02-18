@@ -17,13 +17,13 @@ async def test_verify_search_results(page):
 
 @pytest.mark.asyncio
 async def test_flight_data(page):
-    page, search_url = page
-    trip = test_flightInfo(page)
+    page, search_url = page     # recieves tuple from page fixture
+    trip = test_flightInfo(page)    # creates instance  of flightinfo class
     await page.goto(search_url["url"])
     flight_data_2d = await trip.flight_data() # Call flight_data on the instance
 
 
     print("\nFlight Data (2D Array):")
-    print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))
+    print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))    # arranges all data in a table
     assert len(flight_data_2d) > 0, "No flights found!"
    

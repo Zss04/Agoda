@@ -4,13 +4,11 @@ from urllib.parse import urlparse, parse_qs
 
 
 class test_flightInfo:
-    def __init__(self, page: Page): # This is so we dont have to pass page everytime
-        self.page = page            # stores page value in instance created 
+    def __init__(self, page: Page):  # This is so we dont have to pass page everytime
+        self.page = page            # stores page value in instance created
         self.helper = PlaywrightHelper(page)
-  
-    
+
     async def validate_search(self, search_url):
-    
 
         parsed_url = urlparse(search_url)
         query_params = parse_qs(parsed_url.query)
@@ -120,16 +118,16 @@ class test_flightInfo:
         assert url_infants == infants_count, f"Passenger count mismatch: {url_infants} != {infants_count}"
 
     async def flight_data(self):
-            
+
         await self.page.wait_for_selector("//div[@data-testid='web-refresh-flights-card']")
-        flight_loc = await self.helper.get_element("//div[@data-testid='web-refresh-flights-card']") # check all flight options
+        # check all flight options
+        flight_loc = await self.helper.get_element("//div[@data-testid='web-refresh-flights-card']")
         flight_data_2d = [["Carrier", "Duration", "Price"]]
-        
 
         for flight in flight_loc:
-            # carrier_loc = await self.helper.get_element(flight, "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']") 
+            # carrier_loc = await self.helper.get_element(flight, "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']")
             carrier_loc = await self.helper.get_element(
-                "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']") 
+                "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']")
             carrier = await carrier_loc.inner_text()
             duration_loc = await self.helper.get_element(
                 "//div[@data-testid='flightCard-flight-detail']//span[@data-testid='duration']")
@@ -141,6 +139,7 @@ class test_flightInfo:
                 "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
             currency = await currency_loc.inner_text()
 
-            flight_data_2d.append([carrier.strip(), duration.strip(), f"{price.strip()} {currency.strip()}"])
+            flight_data_2d.append(
+                [carrier.strip(), duration.strip(), f"{price.strip()} {currency.strip()}"])
 
         return flight_data_2d
