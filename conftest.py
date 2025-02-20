@@ -17,7 +17,7 @@ async def browser():
         await browser.close()
 
 @pytest_asyncio.fixture(scope="function")
-async def page(browser,search_url):
+async def page_tuple(browser,search_url):
     print("Creating a new page")
     page = await browser.new_page()
     if page is None:
