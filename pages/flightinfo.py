@@ -31,6 +31,7 @@ class test_flightInfo (basepage) :
         print("Children:", url_children)
         print("Infants:", url_infants)
 
+        await self.wait_for_element("//div[@data-testid='flight-origin-text-search']//input[@role='combobox']")
         search_departure_loc = await self.get_element(
             "//div[@data-testid='flight-origin-text-search']//input[@role='combobox']"
 
@@ -120,8 +121,7 @@ class test_flightInfo (basepage) :
 
     async def flight_data(self):
 
-        await self.page.wait_for_selector("//div[@data-testid='web-refresh-flights-card']")
-        # check all flight options and store in 2D array
+        # check all flight options and store headings in 2D array
         flight_loc = await self.get_elements("//div[@data-testid='web-refresh-flights-card']")
         flight_data_2d = [["Carrier", "Duration", "Price"]]
 

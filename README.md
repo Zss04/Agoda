@@ -9,8 +9,8 @@ This program playwright and Python versions 3.10 and later. To run the test case
 - Install requirements.text packages in your venv
 
 # Executing program
-- Run  playwright install chromium in IDE terminal to download the browser extension
-- Run pytest <file name> or pytest . to run whole test directory
+- Run  playwright install in IDE terminal to download the browser extension
+- Run pytest <file name> or pytest . to run whole test directory 
 
 # Contributors
 Naveed Saleem (naveed.saleem@arbisoft.com)

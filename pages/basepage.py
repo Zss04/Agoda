@@ -11,9 +11,9 @@ class basepage:
             await self.page.wait_for_selector(selector, timeout=timeout)
         except Exception:
             print(f"Warning: selector '{selector}' not found.")
-            return None
+        return None
 
-    async def get_element(self, selector: str, timeout: int = 7000) -> Locator  | None : 
+    async def get_element(self, selector: str, timeout: int = 10000) -> Locator  | None : 
         # Finds and returns a single element locator.
         try:
             await self.page.wait_for_selector(selector, timeout=timeout)
