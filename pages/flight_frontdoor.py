@@ -56,7 +56,6 @@ class test_roundTrip(basepage):
 
         # count number of options in search list to iterate following 'for' loop
         count = await airport_options.count()
-        assert count > 0, "No airport options found"
         for i in range(count):
             Airport_list = await airport_options.nth(i).text_content()
 

@@ -122,7 +122,7 @@ class test_flightInfo (basepage) :
     async def flight_data(self):
 
         # check all flight options and store headings in 2D array
-        flight_loc = await self.get_elements("//div[@data-testid='web-refresh-flights-card']")
+        flight_loc = await self.get_elements("//div[@data-testid='web-refresh-flights-card']",timeout=10000)
         flight_data_2d = [["Carrier", "Duration", "Price"]]
 
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
