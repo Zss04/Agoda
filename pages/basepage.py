@@ -5,7 +5,14 @@ class basepage:
     def __init__(self, page: Page):                                 # This is so we dont have to pass page everytime
         self.page = page                                            # stores page value in instance created 
 
-    
+    async def wait_for_element(self, selector: str, timeout: int = 5000):
+        # Wait for an element to appear on the page.
+        try: 
+            await self.page.wait_for_selector(selector, timeout=timeout)
+        except Exception:
+            print(f"Warning: selector '{selector}' not found.")
+            return None
+
     async def get_element(self, selector: str, timeout: int = 7000) -> Locator  | None : 
         # Finds and returns a single element locator.
         try:

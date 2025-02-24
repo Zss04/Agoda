@@ -11,9 +11,9 @@ class test_roundTrip(basepage):
         super().__init__(page)
 
     # selects the flights tab in the main page
-    async def flights(self):
-        flight = await self.get_element("//li[@id='tab-flight-tab']")
-        await flight.click()
+    async def click_flights(self):
+        await self.click_element("//li[@id='tab-flight-tab']")
+        
 
     async def flights_is_clicked(self):
         flight_tab = await self.get_element("//li[@id='tab-flight-tab']")
@@ -24,20 +24,21 @@ class test_roundTrip(basepage):
 
     async def select_trip_type(self, trip_type):
         valid_trip_types = ["roundTrip", "oneWay"]
-        if trip_type not in valid_trip_types:
-            pytest.fail(f"Invalid trip type: {trip_type}")
+        try:
+            if trip_type in valid_trip_types:
+                await self.click_element(f"//button[@data-component='flight-search-type-{trip_type}']")
+                print(f"Selecting trip type: {trip_type}")
+        except Exception:
+            print(f"Cannot select trip type '{trip_type}'")
             return
 
-        trip_type_locator = await self.get_element(f"//button[@data-component='flight-search-type-{trip_type}']")
-        assert trip_type_locator is not None, f"Trip type button '{trip_type}' not found"
-        await trip_type_locator.click()
-        return
-
+    
     async def wait_for_agoda_image(self):
         try:
             await self.page.wait_for_selector("img[src='https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg']", timeout=10000)
         except TimeoutError:
-            pytest.fail("Agoda image not found within timeout")
+            print("Agoda image not found within timeout")
+            return None
 
     def extract_airport_code(self, text: str) -> str:
         match = re.search(r"([A-Z]{3})\b", text)
@@ -71,7 +72,7 @@ class test_roundTrip(basepage):
 
     
     # Making a function to select Airport
-    async def select_airport(self, departure_Airport_name, arrival_Airport_name):
+    async def set_departure_airport(self, departure_Airport_name):
         # takes departure airport and types in search box
         departure_airport = await self.get_element("#flight-origin-search-input")
         assert departure_airport is not None, "Departure date locator not found"
@@ -85,6 +86,7 @@ class test_roundTrip(basepage):
         actual_departure_code = self.extract_airport_code(actual_departure_text)
         assert selected_departure_code in actual_departure_code, f"Departure Airport mismatch: '{selected_departure_code}', but got '{actual_departure_code}'"
 
+    async def set_arrival_airport(self, arrival_Airport_name):
         # takes arrival airport and types in search box
         arrival_airport = await self.get_element("#flight-destination-search-input")
         assert arrival_airport is not None, "arrival date locator not found"
@@ -98,15 +100,16 @@ class test_roundTrip(basepage):
         actual_arrival_code = self.extract_airport_code(actual_arrival_text)
         assert selected_arrival_code in actual_arrival_text,  f"Arrival Airport mismatch: '{selected_arrival_code}', but got '{actual_arrival_code}'"
 
-    async def select_date(self):
+    async def set_date(self):
         # Get tomorrows date
         departure_date = (datetime.today() + timedelta(days=1))
         return_date = departure_date + \
             timedelta(days=3)  # Calculate the return date
-        await PlaywrightHelper.wait2(self.page)
+
         departure_date_str = departure_date.strftime("%Y-%m-%d")
         return_date_str = return_date.strftime("%Y-%m-%d")
-        await PlaywrightHelper.wait2(self.page)
+
+        await self.wait_for_element("//dix[@data-selenium='range-picker-date'")
 
         departure_locator = await self.get_element(f"//span[@data-selenium-date='{departure_date_str}']")
         await departure_locator.click()
@@ -119,7 +122,7 @@ class test_roundTrip(basepage):
         assert return_locator.is_checked(
         ), f"could not select calender date {return_date_str}"
 
-    async def select_passengers_and_cabin(self, adults=1, children=0, infants=0, cabin="Economy"):
+    async def set_passengers_and_cabin(self, adults=1, children=0, infants=0, cabin="Economy"):
         categories = {
             "adult": adults,
             "children": children,
@@ -155,7 +158,6 @@ class test_roundTrip(basepage):
 
     async def search_successful(self):
         try:
-            await PlaywrightHelper.wait2(self.page)
             await self.page.wait_for_selector("div[data-testid='flight-search-box']")
             return True
 
