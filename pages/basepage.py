@@ -16,7 +16,7 @@ class basepage:
     async def get_element(self, selector: str, timeout: int = 10000) -> Locator  | None : 
         # Finds and returns a single element locator.
         try:
-            await self.page.wait_for_selector(selector, timeout=timeout)
+            await self.wait_for_element(selector, timeout=timeout)
             return self.page.locator(selector)
         except Exception:
             print(f"Warning: Element '{selector}' not found.")
@@ -41,6 +41,8 @@ class basepage:
             print(f"Warning: Child element '{selector}' not found in parent.")
             return None
         
+
+
     async def click_element(self, selector: str):
         # Clicks an element if found.
         element = await self.get_element(selector)

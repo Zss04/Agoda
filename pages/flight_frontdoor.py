@@ -1,4 +1,6 @@
+from typing import Coroutine
 from playwright.async_api import Page
+from playwright.async_api._generated import Locator
 from utils.common import PlaywrightHelper
 from datetime import datetime, timedelta
 import pytest
@@ -10,13 +12,16 @@ class test_roundTrip(basepage):
     def __init__(self, page: Page):
         super().__init__(page)
 
+    async def flights(self) -> Locator | None: 
+        return self.get_element("//li[@id='tab-flight-tab']")
+
     # selects the flights tab in the main page
-    async def click_flights(self):
-        await self.click_element("//li[@id='tab-flight-tab']")
+    async def click_flights(self) -> None:
+        self.flights.click()
         
 
     async def flights_is_clicked(self):
-        flight_tab = await self.get_element("//li[@id='tab-flight-tab']")
+        flight_tab = await self.flights()
         # Check if it has an 'active' or 'selected' class
         is_clicked = await flight_tab.get_attribute("data-selected")
         assert is_clicked == "true", "Flight tab was not selected"
@@ -35,7 +40,7 @@ class test_roundTrip(basepage):
     
     async def wait_for_agoda_image(self):
         try:
-            await self.page.wait_for_selector("img[src='https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg']", timeout=10000)
+            await self.wait_for_element("img[src='https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg']", timeout=10000)
         except TimeoutError:
             print("Agoda image not found within timeout")
             return None
@@ -157,7 +162,7 @@ class test_roundTrip(basepage):
 
     async def search_successful(self):
         try:
-            await self.page.wait_for_selector("div[data-testid='flight-search-box']")
+            await self.wait_for_element("div[data-testid='flight-search-box']")
             return True
 
         except Exception as err:
