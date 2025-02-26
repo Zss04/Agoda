@@ -1,28 +1,38 @@
 import pytest
-from pages.flight_frontdoor import test_roundTrip
+from pages.flight_frontdoor import RoundTrip
 
 
 @pytest.mark.asyncio
 async def test_flight_booking(page_tuple):
     page, set_url = page_tuple
-    rt = test_roundTrip(page)
+    rt = RoundTrip(page)
 
     # Go to Agoda website and wait for logo
     await page.goto("https://agoda.com")
     await rt.wait_for_agoda_image()
     # Locate and click on Flights tab
     await rt.click_flights()
-    await rt.flights_is_clicked()
-    
-    await rt.select_trip_type("roundTrip")
-    await rt.set_departure_airport("Jinnah International Airport")
-    await rt.set_arrival_airport("toronto pearson international airport")
+    assert await rt.flights_is_clicked() == "true", "Flights tab was not clicked"
+
+    await rt.select_roundtrip()
+    assert await rt.is_round_trip_selected(), "Round trip was not selected"
+
+    departure_airport = "Jinnah International Airport"
+    arrival_airport = "Toronto Pearson International Airport"
+    await rt.select_departure_airport(departure_airport)
+    await rt.select_arrival_airport(arrival_airport)
 
     # fill in calender dates and select cabin and passengers
-    await rt.set_date()
-    await rt.set_passengers_and_cabin(adults=2, children=0, infants=0, cabin="Economy")
-    
+    await rt.set_departure_date()
+    await rt.set_return_date()
+    assert await rt.is_departure_date_selected(), "Departure date was not selected"
+    assert await rt.is_return_date_selected(), "Return date was not selected"
+
+    passengers_count = await rt.select_passengers_and_cabin(adults=2, children=0, infants=0, cabin="Economy")
+    actual_passengers_count = await rt.passengers_and_cabin_count()
+    assert actual_passengers_count == passengers_count, "Passengers and cabin count mismatch"
+
+    await rt.search()
     #  validate results by waiting for results page
-    assert rt.search_successful, "Search results were not found"
+    assert await rt.search_successful(), "Search results were not found"
     set_url["url"] = page.url
-    print(f"Stored search URL: {set_url['url']}")

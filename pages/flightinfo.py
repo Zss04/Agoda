@@ -1,18 +1,21 @@
 from playwright.async_api import Page, Locator
 from urllib.parse import urlparse, parse_qs
-from pages.basepage import basepage
-from utils.common import PlaywrightHelper 
+from pages.basepage import BasePage
 
-class test_flightInfo (basepage) :
-    def __init__(self, page: Page):  
+
+class FlightInfo (BasePage):
+    def __init__(self, page: Page):
         super().__init__(page)
-        
+
     async def validate_search(self, search_url):
 
-        parsed_url = urlparse(search_url)       # breaks the url into different parts (query,domain,path,directory,etc)
-        query_params = parse_qs(parsed_url.query)       # takes the query of the url 
+        # breaks the url into different parts (query,domain,path,directory,etc)
+        parsed_url = urlparse(search_url)
+        # takes the query of the url
+        query_params = parse_qs(parsed_url.query)
 
-        url_departure = query_params.get("departureFrom", [""])[0] # breaks url down by search filter
+        url_departure = query_params.get("departureFrom", [""])[
+            0]  # breaks url down by search filter
         url_arrival = query_params.get("arrivalTo", [""])[0]
         url_departure_date = query_params.get("departDate", [""])[0]
         url_return_date = query_params.get("returnDate", [""])[0]
@@ -42,7 +45,6 @@ class test_flightInfo (basepage) :
         )
         search_arrival = await search_arrival_loc.get_attribute("value")
 
-        
         search_calender_departure = await self.get_element(
             "//div[@data-testid='date-picker-container']"
         )
@@ -121,25 +123,25 @@ class test_flightInfo (basepage) :
     async def flight_data(self):
 
         # check all flight options and store headings in 2D array
-        flight_loc = await self.get_elements("//div[@data-testid='web-refresh-flights-card']",timeout=10000)
+        flight_loc = await self.get_elements("//div[@data-testid='web-refresh-flights-card']", timeout=10000)
         flight_data_2d = [["Carrier", "Duration", "Price"]]
 
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
-        for flight in flight_loc:        
+        for flight in flight_loc:
 
-            carrier_loc = await self.get_element_child(flight,  
-                "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']")
+            carrier_loc = await self.get_element_child(flight,
+                                                       "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']")
             carrier = await carrier_loc.inner_text()
-            duration_loc = await self.get_element_child(flight, 
-                "//div[@data-testid='flightCard-flight-detail']//span[@data-testid='duration']")
+            duration_loc = await self.get_element_child(flight,
+                                                        "//div[@data-testid='flightCard-flight-detail']//span[@data-testid='duration']")
             duration = await duration_loc.inner_text()
-            price_loc = await self.get_element_child(flight, 
-                "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP bEtAca kkhXWj']")
+            price_loc = await self.get_element_child(flight,
+                                                     "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP bEtAca kkhXWj']")
             price = await price_loc.inner_text()
-            currency_loc = await self.get_element_child(flight,  
-                "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
+            currency_loc = await self.get_element_child(flight,
+                                                        "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
             currency = await currency_loc.inner_text()
-            # appends data in array under respective headers 
+            # appends data in array under respective headers
             flight_data_2d.append(
                 [carrier.strip(), duration.strip(), f"{price.strip()} {currency.strip()}"])
 
