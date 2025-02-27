@@ -28,7 +28,7 @@ class BasePage:
         # Finds and returns a list of element locators.
         try:
             await self.wait_for_element(selector, timeout=timeout)
-            return self.page.locator(selector).all()
+            return await self.page.locator(selector).all()
         except Exception:
             print(f"Warning: Elements '{selector}' not found.")
             return []
@@ -36,7 +36,7 @@ class BasePage:
     async def get_element_child(self, parent: Locator, selector: str, timeout: int = 5000) -> Locator | None:
         # Finds a child element within a parent locator.
         try:
-            await parent.wait_for(timeout=timeout, state='visible')
+            # await parent.wait_for(timeout=timeout, state='visible')
             return parent.locator(selector)
         except Exception:
             print(f"Warning: Child element '{selector}' not found in parent.")

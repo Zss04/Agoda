@@ -12,7 +12,6 @@ async def test_verify_search_results(page_tuple):
     await page.goto(get_url["url"])
     await trip.validate_search(get_url["url"])
     print("search validated")
-    return None
 
 
 @pytest.mark.asyncio
