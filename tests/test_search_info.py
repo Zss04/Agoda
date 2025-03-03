@@ -10,7 +10,7 @@ async def test_verify_search_results(page_tuple):
     page, get_url = page_tuple
     trip = FlightInfo(page)
     await page.goto(get_url["url"])
-    await trip.validate_search(get_url["url"])
+    assert await trip.validate_search(get_url["url"])
     print("search validated")
 
 
@@ -25,3 +25,13 @@ async def test_flight_data(page_tuple):
     # arranges all data in a table
     print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))
     assert len(flight_data_2d) > 0, "No flights found!"
+
+# @pytest.mark.asyncio
+# async def test_flight_stops(page_tuple):
+#     page, get_url = page_tuple
+#     trip = FlightInfo(page)
+#     await page.goto("https://www.agoda.com/flights/results?departureFrom=KHI&departureFromType=1&arrivalTo=YYZ&arrivalToType=1&...valTo=YYZ&arrivalToType=1&departDate=2025-04-29&returnDate=2025-08-20&searchType=2&cabinType=Economy&adults=2&sort=8")
+
+#     # assert await trip.flight_direct_stop(), f"Non direct flights found in direct filter"
+#     assert await trip.flight_one_stop(), f"Non one stop flights found in one stop filter"
+    

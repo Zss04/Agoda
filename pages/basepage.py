@@ -15,6 +15,14 @@ class BasePage:
             print(f"Warning: selector '{selector}' not found.")
         return None
 
+    async def wait_for_loaded_state(self, state: str = 'domcontentloaded', timeout: int = 10000):
+        # Wait for the page to load.
+        try:
+            await self.page.wait_for_load_state(state, timeout=timeout)
+        except Exception:
+            print(f"Warning: Page did not load.")
+        return None
+    
     async def get_element(self, selector: str, timeout: int = 10000) -> Locator | None:
         # Finds and returns a single element locator.
         try:

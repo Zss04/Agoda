@@ -39,20 +39,38 @@ class RoundTrip(BasePage):
     async def get_next_month_button(self) -> Locator | None:
         return await self.get_element("//button[@data-selenium='calendar-next-month-button']")
     
-    async def get_departure_date(self, departure_date_str) -> Locator | None:
+    async def get_departure_date_temp(self, departure_date_str) -> Locator | None:
         return await self.get_element(f"//span[@data-selenium-date='{departure_date_str}']")
 
-    
-    async def get_return_date(self, return_date_str) -> Locator | None:
-        return await self.get_element(f"//span[@data-selenium-date='{return_date_str}']")
-
-    async def get_future_return_date (self, return_date_str) -> Locator | None:
+    async def get_departure_date(self, departure_date_str) -> Locator | None:
         max_attempts =12 
         attempts = 0 
 
         while attempts < max_attempts:
             try:
-                return_date = await self.get_return_date(return_date_str)
+                departure_date = await self.get_departure_date_temp(departure_date_str)
+                if await departure_date.is_visible():
+                    return departure_date
+            except Exception:
+                pass
+            next_month_button = await self.get_next_month_button()
+            if next_month_button:
+                await next_month_button.click()
+                await PlaywrightHelper.wait1(self.page)
+            else:
+                raise Exception("Next month button not found")
+            attempts += 1
+
+    async def get_return_date_temp(self, return_date_str) -> Locator | None:
+        return await self.get_element(f"//span[@data-selenium-date='{return_date_str}']")
+
+    async def get_return_date (self, return_date_str) -> Locator | None:
+        max_attempts =12 
+        attempts = 0 
+
+        while attempts < max_attempts:
+            try:
+                return_date = await self.get_return_date_temp(return_date_str)
                 if await return_date.is_visible():
                     return return_date
             except Exception:
@@ -87,7 +105,7 @@ class RoundTrip(BasePage):
         return await self.get_element("//button[@data-test='SearchButtonBox']")
 
     async def get_search_results(self) -> Locator | None:
-        return await self.get_element("//div[@data-testid='flight-search-box']")
+        return await self.get_element("//div[@data-component='flight-search-box']")
 
     async def get_passengers_and_cabin_count(self) -> Locator | None:
         return await self.get_element("//div[@data-component='flight-search-occupancy']//div[@class='SearchBoxTextDescription__title']")
@@ -110,20 +128,20 @@ class RoundTrip(BasePage):
 
     async def set_return_date(self) -> None:
         return_date_str = self.return_date_generator()
-        await (await self.get_future_return_date(return_date_str)).click()
+        await (await self.get_return_date(return_date_str)).click()
 
     def departure_date_generator(self) -> str:
         # Get tomorrows date
-        departure_date = (datetime.today() + timedelta(days=1))
+        departure_date = (datetime.today() + timedelta(days=2))
         # Format the dates in (YYYY-MM-DD) format
-        departure_date_str = departure_date.strftime("%Y-%m-%d")
+        departure_date_str = PlaywrightHelper.format_date(departure_date)
         return departure_date_str
 
     def return_date_generator(self) -> str:
         # Get return date
-        return_date = (datetime.today() + timedelta(days=15))
+        return_date = (datetime.today() + timedelta(days=10))
         # Format the dates in (YYYY-MM-DD) format
-        return_date_str = return_date.strftime("%Y-%m-%d")
+        return_date_str = PlaywrightHelper.format_date(return_date)
         return return_date_str
 
     # selects the flights tab in the main page
@@ -150,7 +168,7 @@ class RoundTrip(BasePage):
         try:
             agoda_image = await self.get_agoda_image()
             await agoda_image.wait_for(timeout=timeout, state="visible")
-            return True
+            return None
         except TimeoutError:
             print("Agoda image not found within timeout")
             return None
@@ -275,7 +293,8 @@ class RoundTrip(BasePage):
 
     async def search_successful(self) -> bool:
         try:
-            await (await self.get_search_results()).wait_for(timeout=10000, state="visible")
+            results = await self.get_search_results()
+            await results.wait_for(timeout=15000, state="visible")
             return True
 
         except TimeoutError:
