@@ -132,14 +132,14 @@ class RoundTrip(BasePage):
 
     def departure_date_generator(self) -> str:
         # Get tomorrows date
-        departure_date = (datetime.today() + timedelta(days=2))
+        departure_date = (datetime.today() + timedelta(days=20))
         # Format the dates in (YYYY-MM-DD) format
         departure_date_str = PlaywrightHelper.format_date(departure_date)
         return departure_date_str
 
     def return_date_generator(self) -> str:
         # Get return date
-        return_date = (datetime.today() + timedelta(days=10))
+        return_date = (datetime.today() + timedelta(days=25))
         # Format the dates in (YYYY-MM-DD) format
         return_date_str = PlaywrightHelper.format_date(return_date)
         return return_date_str
@@ -164,14 +164,35 @@ class RoundTrip(BasePage):
             return True
         return False
 
-    async def wait_for_agoda_image(self, timeout=10000):
+    async def wait_for_agoda_image(self):
         try:
             agoda_image = await self.get_agoda_image()
-            await agoda_image.wait_for(timeout=timeout, state="visible")
+            await self.wait_for_element(agoda_image)
             return None
         except TimeoutError:
             print("Agoda image not found within timeout")
             return None
+
+
+    async def _set_and_verify_airport(self, airport_name: str, set_airport_func, get_airport_func, airport_label: str) -> None:
+        # Set the airport via the search box.
+        await set_airport_func(airport_name)
+        
+        # Select the airport from the options and extract its code.
+        selected_text = await self.select_airport_options(airport_name)
+        selected_code = self.extract_airport_code(selected_text)
+        
+        # Wait 
+        await PlaywrightHelper.wait2(self.page)
+        
+        # Get the current value from the airport input field and extract its code.
+        actual_text = await (await get_airport_func()).input_value()
+        actual_code = self.extract_airport_code(actual_text)
+        
+        # Assert that the selected airport code is in the actual airport code.
+        assert (
+            selected_code in actual_code
+        ), f"{airport_label} Airport mismatch: '{selected_code}', but got '{actual_code}'"
 
     def extract_airport_code(self, text: str) -> str:
         match = re.search(r"([A-Z]{3})\b", text)
@@ -198,38 +219,26 @@ class RoundTrip(BasePage):
         await airport_options.first.click()
         return Airport_list_name.strip()
 
-    async def select_departure_airport(self, departure_Airport_name):
-        # takes departure airport and types in search box
-        await self.set_departure_airport(departure_Airport_name)
+    async def select_departure_airport(self, departure_airport_name: str) -> None:
+        await self._set_and_verify_airport(
+            departure_airport_name,
+            self.set_departure_airport,
+            self.get_departure_airport,
+            "Departure"
+        )
 
-       # Extracts airport code from airport list and user typed airport and
-       # asserts if they match
-        selected_departure_text = await self.select_airport_options(departure_Airport_name)
-        selected_departure_code = self.extract_airport_code(
-            selected_departure_text)
-        await PlaywrightHelper.wait2(self.page)
-        actual_departure_text = await (await self.get_departure_airport()).input_value()
-        actual_departure_code = self.extract_airport_code(
-            actual_departure_text)
-        assert selected_departure_code in actual_departure_code, f"Departure Airport mismatch: '{selected_departure_code}', but got '{actual_departure_code}'"
 
-    async def select_arrival_airport(self, arrival_Airport_name):
-        # takes arrival airport and types in search box
-        await self.set_arrival_airport(arrival_Airport_name)
+    async def select_arrival_airport(self, arrival_airport_name: str) -> None:
+        await self._set_and_verify_airport(
+            arrival_airport_name,
+            self.set_arrival_airport,
+            self.get_arrival_airport,
+            "Arrival"
+        )
 
-       # Extracts airport code from airport list and user typed airport and
-       # asserts if they match
-        selected_arrival_text = await self.select_airport_options(arrival_Airport_name)
-        selected_arrival_code = self.extract_airport_code(
-            selected_arrival_text)
-        await PlaywrightHelper.wait2(self.page)
-        actual_arrival_text = await (await self.get_arrival_airport()).input_value()
-        actual_arrival_code = self.extract_airport_code(actual_arrival_text)
-        assert selected_arrival_code in actual_arrival_text, f"Arrival Airport mismatch: '{selected_arrival_code}', but got '{actual_arrival_code}'"
-
-    async def wait_for_calender(self, timeout=10000):
+    async def wait_for_calender(self):
         calender = await self.get_calender()
-        await calender.wait_for(timeout=timeout, state="visible")
+        await self.wait_for_element(calender)
 
     async def is_departure_date_selected(self) -> bool:
         departure_date_str = self.departure_date_generator()
@@ -294,7 +303,7 @@ class RoundTrip(BasePage):
     async def search_successful(self) -> bool:
         try:
             results = await self.get_search_results()
-            await results.wait_for(timeout=15000, state="visible")
+            await self.wait_for_element(results)
             return True
 
         except TimeoutError:

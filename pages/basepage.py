@@ -7,12 +7,12 @@ class BasePage:
         # stores page value in instance created
         self.page = page
 
-    async def wait_for_element(self, selector: str, timeout: int = 5000):
+    async def wait_for_element(self, Loc: Locator, timeout: int = 5000):
         # Wait for an element to appear on the page.
         try:
-            await self.page.wait_for_selector(selector, timeout=timeout)
+            await Loc.wait_for(timeout=timeout, state='visible')
         except Exception:
-            print(f"Warning: selector '{selector}' not found.")
+            print(f"Warning: Locator '{Locator}' not found.")
         return None
 
     async def wait_for_loaded_state(self, state: str = 'domcontentloaded', timeout: int = 10000):
@@ -26,7 +26,7 @@ class BasePage:
     async def get_element(self, selector: str, timeout: int = 10000) -> Locator | None:
         # Finds and returns a single element locator.
         try:
-            await self.wait_for_element(selector, timeout=timeout)
+            await self.page.wait_for_selector(selector, timeout=timeout)
             return self.page.locator(selector)
         except Exception:
             print(f"Warning: Element '{selector}' not found.")
@@ -35,7 +35,7 @@ class BasePage:
     async def get_elements(self, selector: str, timeout: int = 5000) -> list[Locator]:
         # Finds and returns a list of element locators.
         try:
-            await self.wait_for_element(selector, timeout=timeout)
+            await self.page.wait_for_selector(selector, timeout=timeout)
             return await self.page.locator(selector).all()
         except Exception:
             print(f"Warning: Elements '{selector}' not found.")
@@ -44,7 +44,6 @@ class BasePage:
     async def get_element_child(self, parent: Locator, selector: str, timeout: int = 5000) -> Locator | None:
         # Finds a child element within a parent locator.
         try:
-            # await parent.wait_for(timeout=timeout, state='visible')
             return parent.locator(selector)
         except Exception:
             print(f"Warning: Child element '{selector}' not found in parent.")

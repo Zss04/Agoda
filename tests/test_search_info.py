@@ -26,12 +26,12 @@ async def test_flight_data(page_tuple):
     print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))
     assert len(flight_data_2d) > 0, "No flights found!"
 
-# @pytest.mark.asyncio
-# async def test_flight_stops(page_tuple):
-#     page, get_url = page_tuple
-#     trip = FlightInfo(page)
-#     await page.goto("https://www.agoda.com/flights/results?departureFrom=KHI&departureFromType=1&arrivalTo=YYZ&arrivalToType=1&...valTo=YYZ&arrivalToType=1&departDate=2025-04-29&returnDate=2025-08-20&searchType=2&cabinType=Economy&adults=2&sort=8")
+@pytest.mark.asyncio
+async def test_flight_stops(page_tuple):
+    page, get_url = page_tuple
+    trip = FlightInfo(page)
+    await page.goto(get_url["url"])
 
-#     # assert await trip.flight_direct_stop(), f"Non direct flights found in direct filter"
-#     assert await trip.flight_one_stop(), f"Non one stop flights found in one stop filter"
-    
+    assert await trip.flight_direct_stop(), f"Non direct flights found in direct filter"
+    assert await trip.flight_one_stop(), f"Non one stop flights found in one stop filter"
+    # assert await trip.flight_two_plus_stop()
