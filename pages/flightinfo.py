@@ -67,6 +67,9 @@ class FlightInfo(BasePage):
     async def get_flight_currency(self, flight) -> Locator | None:
         return await self.get_element_child(flight, "//span[@data-element-name='flight-price-breakdown']//span[@class='sc-jsMahE sc-kFuwaP brYcTc bpqEor']")
     
+    async def get_flight_dropdown(self, flight) -> Locator | None:
+        return await self.get_element_child(flight, "//div[@class='FlightsCard-module__collapsedChevron--kYIMo']")
+    
     async def get_direct_stop_checkbox(self) -> Locator | None:
         return await self.get_element("//div[@data-component='Direct']//label[@data-element-name='flight-filter-stops-item']")
 
@@ -78,7 +81,7 @@ class FlightInfo(BasePage):
     
     async def get_layover_count(self, flight) -> Locator | None:
         return await self.get_element_child(flight, "//div[contains(@class, 'aa373-text-inherit aa373-relative aa373-mx-auto') and contains(@class, 'aa373-fill-inherit')]//span[@data-testid='layover']")
-    
+        
     async def get_temp_title(self) -> Locator | None:
         return await self.get_element("//h2[@data-component='mob-flight-result-title']")
     
@@ -90,8 +93,8 @@ class FlightInfo(BasePage):
         header = await self.validate_from_header()
 
         for url_value, header_value in zip(url, header):
-            url_value = str(url_value)
-            header_value = str(header_value)
+            url_value = (str(url_value)).replace(" ","").lower()
+            header_value = (str(header_value)).replace(" ","").lower()
             if url_value.strip() not in header_value.strip():
                 return False
         return True
@@ -113,12 +116,15 @@ class FlightInfo(BasePage):
         header_data = []
 
         # Extract departure and arrival locations
+        await self.wait_for_loaded_state()
+        await PlaywrightHelper.wait1(self.page)
         departure_input_element = await self.get_search_departure_loc()
         await self.wait_for_element(departure_input_element)
         departure_value = await departure_input_element.get_attribute("value")
         header_data.append(departure_value)
 
         arrival_input_element = await self.get_search_arrival_loc()
+        await self.wait_for_element(arrival_input_element)
         arrival_value = await arrival_input_element.get_attribute("value")
         header_data.append(arrival_value)
 
@@ -165,7 +171,12 @@ class FlightInfo(BasePage):
         return header_data
 
     async def flight_data(self) -> list[list[str]]:
-
+        # check if results are available
+        await self.wait_for_loaded_state()
+        no_results = await self.check_no_flights_message()
+        if no_results:
+            return [["No flights available for these dates."]]
+        
         # check all flight options and store headings in 2D array
         flight_loc = await self.get_flight_cards()
         flight_data_2d = [["Carrier", "Duration", "Price", "Layovers"]]
@@ -206,14 +217,14 @@ class FlightInfo(BasePage):
             trip_stops = "One Stop"
         else: 
             trip_stops = "2+ stops"
-
-        # Check if a "no results" message is visible
-        no_results = await self.check_no_flights_message()
+        
         flight_data = await self.flight_data()
-
+        no_results = await self.check_no_flights_message()
         # Getting layover count at index 3 in each row (after the header row)
         layover_column = [row[3] for row in flight_data[1:] if len(row) > 3]
 
+        # check if there is no results message
+        
         # If no results message is shown and all extracted layover values are within allowed stops, we return True
         if no_results and all(stop in allowed_stops for stop in layover_column):
             print(f"There were no flights available for these days for {trip_stops}")
@@ -222,34 +233,40 @@ class FlightInfo(BasePage):
         # Otherwise, check the flight cards one by one
         flights_available = await self.get_flight_cards()
         print(f"Number of stops for {trip_stops} are: ")
+
         for flight in flights_available:
+            self.wait_for_loaded_state()
+            self.wait_for_element(flight)
+
             stops = await self.layover_count(flight)
             print(f"{stops}\n")
             if stops not in allowed_stops:
                 return False
         return True
 
-    async def layover_count (self, flight_locator):
-        layover_locator = await self.get_layover_count(flight_locator)
+    async def layover_count (self, flight):
+        layovers_loc = await self.get_layover_count(flight)
         try:
-            if await layover_locator.count() > 0:  
-                layovers = await layover_locator.inner_text()
+            if await layovers_loc.count() > 0:  
+                layovers = await layovers_loc.inner_text()
                 layovers_count = int(layovers.strip())
             else:
                 layovers_count = 0  # If no element found, assume 0 layovers
         except Exception as e: 
             print(f"Error retrieving layover count: {e}")
             layovers_count = 0
-        # debugging
         return layovers_count
         
     async def check_no_flights_message(self) -> bool:
         try:
             await self.wait_for_loaded_state()
             no_results = await self.get_no_results_page()
-            return bool(no_results)
+            if no_results:
+                return True  # Indicates that the "no flights" message is displayed
+            return False  # Indicates that flights are available
         except Exception as e:
-            print("No flights available for these dates")
+            print(f"Error checking for no flights message: {e}")
+            return False  # Assume flights are available if there's an error
 
     async def click_checkbox_and_wait(self, checkbox_getter) -> None:
         checkbox = await checkbox_getter()
@@ -259,11 +276,14 @@ class FlightInfo(BasePage):
 
     # Direct flights should only have 0 stops.
     async def flight_direct_stop(self) -> bool:
+        no_results = await self.check_no_flights_message()
+        if no_results:
+            return True
         return await self.process_flight_option(self.get_direct_stop_checkbox, [0])
 
     # One-stop flights can have either 0 or 1 stop.
     async def flight_one_stop(self) -> bool:
-        return await self.process_flight_option(self.get_one_stop_checkbox, [0, 1])
+        return await self.process_flight_option(self.get_one_stop_checkbox, [0,1])
     
     async def flight_two_plus_stop(self) -> bool:
         return await self.process_flight_option(self.get_two_plus_stop_checkbox, [0, 1, 2, 3, 4])

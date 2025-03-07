@@ -1,9 +1,13 @@
 import pytest
 from pages.flight_frontdoor import RoundTrip
 
-
 @pytest.mark.asyncio
-async def test_flight_booking(page_tuple):
+@pytest.mark.parametrize("departure_airport, arrival_airport , adults, children, infants, cabin",
+                            [
+                             
+                             ("Allama Iqbal International Airport", "Istanbul Airport", 1 , 0, 0, "Economy")
+                            ])
+async def test_flight_booking(page_tuple, departure_airport, arrival_airport, adults, children, infants, cabin):
     page, set_url = page_tuple
     rt = RoundTrip(page)
 
@@ -17,8 +21,6 @@ async def test_flight_booking(page_tuple):
     await rt.select_roundtrip()
     assert await rt.is_round_trip_selected(), "Round trip was not selected"
 
-    departure_airport = "Jinnah International Airport"
-    arrival_airport = "Toronto Pearson International Airport"
     await rt.select_departure_airport(departure_airport)
     await rt.select_arrival_airport(arrival_airport)
 
@@ -28,7 +30,7 @@ async def test_flight_booking(page_tuple):
     assert await rt.is_departure_date_selected(), "Departure date was not selected"
     assert await rt.is_return_date_selected(), "Return date was not selected"
 
-    passengers_count = await rt.select_passengers_and_cabin(adults=2, children=0, infants=0, cabin="Economy")
+    passengers_count = await rt.select_passengers_and_cabin(adults, children, infants, cabin)
     actual_passengers_count = await rt.passengers_and_cabin_count()
     assert actual_passengers_count == passengers_count, "Passengers and cabin count mismatch"
 

@@ -132,14 +132,14 @@ class RoundTrip(BasePage):
 
     def departure_date_generator(self) -> str:
         # Get tomorrows date
-        departure_date = (datetime.today() + timedelta(days=20))
+        departure_date = (datetime.today() + timedelta(days=10))
         # Format the dates in (YYYY-MM-DD) format
         departure_date_str = PlaywrightHelper.format_date(departure_date)
         return departure_date_str
 
     def return_date_generator(self) -> str:
         # Get return date
-        return_date = (datetime.today() + timedelta(days=25))
+        return_date = (datetime.today() + timedelta(days=29))
         # Format the dates in (YYYY-MM-DD) format
         return_date_str = PlaywrightHelper.format_date(return_date)
         return return_date_str
@@ -206,13 +206,13 @@ class RoundTrip(BasePage):
         # loop
         count = await airport_options.count()
         for i in range(count):
-            Airport_list = await airport_options.nth(i).text_content()
+            Airport_list = await airport_options.nth(i).inner_text()
 
             # Matches user inputted text with text from list
             if Airport_name.lower() in Airport_list.lower():
                 Airport_list_name = Airport_list.strip()
                 await airport_options.nth(i).click()
-                return Airport_list_name
+                return Airport_list_name # returns airport name to assert function
 
         # if no other search option matches then click first option
         Airport_list_name = await airport_options.first.text_content()

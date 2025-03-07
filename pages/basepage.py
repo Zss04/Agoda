@@ -12,7 +12,7 @@ class BasePage:
         try:
             await Loc.wait_for(timeout=timeout, state='visible')
         except Exception:
-            print(f"Warning: Locator '{Locator}' not found.")
+            print(f"Warning: Locator '{Loc}' not found.")
         return None
 
     async def wait_for_loaded_state(self, state: str = 'domcontentloaded', timeout: int = 10000):
