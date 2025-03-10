@@ -34,9 +34,6 @@ class FlightInfo(BasePage):
             "and contains(@class, 'filled') and contains(@class, 'Calendar__endDate--1j6dD')]/div[@data-selenium-date]"
         )
 
-    async def get_next_month_button(self) -> Locator | None:
-        return await self.get_element("//button[@data-selenium='calendar-next-month-button']")
-
     async def get_search_passengers(self) -> Locator | None:
         return await self.get_element("//div[@data-element-name='flight-occupancy']")
 
@@ -117,7 +114,7 @@ class FlightInfo(BasePage):
 
         # Extract departure and arrival locations
         await self.wait_for_loaded_state()
-        await PlaywrightHelper.wait1(self.page)
+
         departure_input_element = await self.get_search_departure_loc()
         await self.wait_for_element(departure_input_element)
         departure_value = await departure_input_element.get_attribute("value")
@@ -142,7 +139,6 @@ class FlightInfo(BasePage):
 
         
         return_date_element = await self.get_search_return_date()
-        await PlaywrightHelper.wait1(self.page)
         return_date = await return_date_element.get_attribute("data-selenium-date")
         header_data.append(return_date)
 

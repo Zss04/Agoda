@@ -42,46 +42,18 @@ class RoundTrip(BasePage):
     async def get_departure_date_temp(self, departure_date_str) -> Locator | None:
         return await self.get_element(f"//span[@data-selenium-date='{departure_date_str}']")
 
-    async def get_departure_date(self, departure_date_str) -> Locator | None:
-        max_attempts =12 
-        attempts = 0 
-
-        while attempts < max_attempts:
-            try:
-                departure_date = await self.get_departure_date_temp(departure_date_str)
-                if await departure_date.is_visible():
-                    return departure_date
-            except Exception:
-                pass
-            next_month_button = await self.get_next_month_button()
-            if next_month_button:
-                await next_month_button.click()
-                await PlaywrightHelper.wait1(self.page)
-            else:
-                raise Exception("Next month button not found")
-            attempts += 1
+    async def get_departure_date(self , depart_arrive_date_str) -> Locator | None:
+        get_departure_date_temp = self.get_departure_date_temp
+        next_month_button = self.get_next_month_button
+        return await PlaywrightHelper.date_select_helper(self, get_departure_date_temp, next_month_button, depart_arrive_date_str)
 
     async def get_return_date_temp(self, return_date_str) -> Locator | None:
         return await self.get_element(f"//span[@data-selenium-date='{return_date_str}']")
 
-    async def get_return_date (self, return_date_str) -> Locator | None:
-        max_attempts =12 
-        attempts = 0 
-
-        while attempts < max_attempts:
-            try:
-                return_date = await self.get_return_date_temp(return_date_str)
-                if await return_date.is_visible():
-                    return return_date
-            except Exception:
-                pass
-            next_month_button = await self.get_next_month_button()
-            if next_month_button:
-                await next_month_button.click()
-                await PlaywrightHelper.wait1(self.page)
-            else:
-                raise Exception("Next month button not found")
-            attempts += 1
+    async def get_return_date (self, depart_arrive_date_str) -> Locator | None:
+        get_arrival_date_temp = self.get_departure_date_temp
+        next_month_button = self.get_next_month_button
+        return await PlaywrightHelper.date_select_helper(self, get_arrival_date_temp, next_month_button, depart_arrive_date_str)
 
     async def get_selected_departure_date(self) -> Locator | None:
         return await self.get_element("//div[@data-component='flight-search-departureDate']")
@@ -110,17 +82,17 @@ class RoundTrip(BasePage):
     async def get_passengers_and_cabin_count(self) -> Locator | None:
         return await self.get_element("//div[@data-component='flight-search-occupancy']//div[@class='SearchBoxTextDescription__title']")
 
-    async def set_departure_airport(self, airport_name: str) -> None:
+    async def set_departure_airport(self, airport_name: str, timeout = 2000) -> None:
         departure_airport = await self.get_departure_airport()
         await departure_airport.click()
-        await departure_airport.type(airport_name)
-        await PlaywrightHelper.wait2(self.page)
+        await departure_airport.type(airport_name, timeout=timeout)
+        
 
-    async def set_arrival_airport(self, airport_name: str) -> None:
+    async def set_arrival_airport(self, airport_name: str, timeout = 2000) -> None:
         arrival_airport = await self.get_arrival_airport()
         await arrival_airport.click()
-        await arrival_airport.type(airport_name)
-        await PlaywrightHelper.wait2(self.page)
+        await arrival_airport.type(airport_name, timeout=timeout)
+
 
     async def set_departure_date(self) -> None:
         departure_date_str = self.departure_date_generator()
@@ -177,14 +149,12 @@ class RoundTrip(BasePage):
     async def _set_and_verify_airport(self, airport_name: str, set_airport_func, get_airport_func, airport_label: str) -> None:
         # Set the airport via the search box.
         await set_airport_func(airport_name)
+        await PlaywrightHelper.wait_1000()
         
         # Select the airport from the options and extract its code.
         selected_text = await self.select_airport_options(airport_name)
         selected_code = self.extract_airport_code(selected_text)
-        
-        # Wait 
-        await PlaywrightHelper.wait2(self.page)
-        
+                
         # Get the current value from the airport input field and extract its code.
         actual_text = await (await get_airport_func()).input_value()
         actual_code = self.extract_airport_code(actual_text)
@@ -206,7 +176,7 @@ class RoundTrip(BasePage):
         # loop
         count = await airport_options.count()
         for i in range(count):
-            Airport_list = await airport_options.nth(i).inner_text()
+            Airport_list = await airport_options.nth(i).text_content()
 
             # Matches user inputted text with text from list
             if Airport_name.lower() in Airport_list.lower():

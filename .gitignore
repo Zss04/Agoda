@@ -1,11 +1,8 @@
 .pytest_cache/
-.DS_Store/
 .vscode/
 venv/
 **/__pycache__/
-.idea/.DS_Store
+**/.DS_Store/
 .idea/
-Reports/.DS_Store
-tests/.DS_Store
 assets/
 Reports/
