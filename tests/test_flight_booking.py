@@ -4,7 +4,7 @@ from pages.flight_frontdoor import RoundTrip
 @pytest.mark.asyncio
 @pytest.mark.parametrize("departure_airport, arrival_airport , adults, children, infants, cabin",
                             [
-                             
+                             ("Jinnah International Airport", "John F. Kennedy", 2 , 1, 0, "Business"),
                              ("Allama Iqbal International Airport", "Istanbul Airport", 1 , 0, 0, "Economy")
                             ])
 async def test_flight_booking(page_tuple, departure_airport, arrival_airport, adults, children, infants, cabin):

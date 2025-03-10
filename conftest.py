@@ -19,7 +19,7 @@ async def browser():
     """Fixture to launch and manage the browser instance."""
     print("Launching browser")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         if browser is None:
             pytest.fail("The browser did not load.")
         yield browser
@@ -36,16 +36,14 @@ async def page_tuple(browser, search_url, request):
 
     # After the test completes, take a screenshot
     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
+        # Saves locally in this directory
         screenshot_dir = os.path.expanduser("~/Downloads/agoda/Reports/Images/")
         os.makedirs(screenshot_dir, exist_ok=True)
         screenshot_path = os.path.join(
             screenshot_dir, f"{request.node.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
         )
-        print(f"Saving screenshot to: {screenshot_path}")
         await page.screenshot(path=screenshot_path)
-        print(f"Setting screenshot_path: {screenshot_path}")
         request.node.screenshot_path = screenshot_path
-        print(f"Saved screenshot to: {screenshot_path}")
 
     await page.close()
     
@@ -55,12 +53,11 @@ def pytest_html_report_title(report):
     report.title = f"Test Report: {module_name}"
 
 
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
     if report.when == "call":
-        print(f"Report phase: {report.when}, Outcome: {report.outcome}, Failed: {report.failed}")
         item.rep_call = report
 
     if report.when == "teardown":
@@ -69,9 +66,6 @@ def pytest_runtest_makereport(item, call):
                 screenshot_path = item.screenshot_path
                 extras = getattr(report, "extras", [])
                 if os.path.exists(screenshot_path):
-                    print(f"appending screenshot to report with path {screenshot_path}")
                     extras.append(pytest_html.extras.image(screenshot_path))
                     item.rep_call.extras = extras
-                print("Screenshot attached successfully!")
-            else:
-                print("screenshot_path not found on item")
+            

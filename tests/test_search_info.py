@@ -26,7 +26,7 @@ async def test_flight_data(page_tuple):
     print("\nFlight Data (Array):")
     # arranges all data in a table
     print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))
-    assert len(flight_data_2d) == 0, "No flights found!"
+    assert len(flight_data_2d) > 0, "No flights found!"
 
 @pytest.mark.asyncio
 async def test_flight_stops(page_tuple):

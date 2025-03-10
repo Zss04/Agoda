@@ -80,7 +80,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//div[@data-component='TwoPlus']//label[@data-element-name='flight-filter-stops-item']")
     
     async def get_layover_count(self, flight) -> Locator | None:
-        return await self.get_element_child(flight, "//div[contains(@class, 'aa373-text-inherit aa373-relative aa373-mx-auto') and contains(@class, 'aa373-fill-inherit')]//span[@data-testid='layover']")
+        return await self.get_element_child(flight, "//span[@class='sc-jsMahE sc-kFuwaP bEtAca fdKTiB']")
         
     async def get_temp_title(self) -> Locator | None:
         return await self.get_element("//h2[@data-component='mob-flight-result-title']")
@@ -172,7 +172,6 @@ class FlightInfo(BasePage):
 
     async def flight_data(self) -> list[list[str]]:
         # check if results are available
-        await self.wait_for_loaded_state()
         no_results = await self.check_no_flights_message()
         if no_results:
             return [["No flights available for these dates."]]
@@ -183,8 +182,6 @@ class FlightInfo(BasePage):
 
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
         for flight in flight_loc:
-            await self.wait_for_element(flight)
-
             carrier_loc = await self.get_flight_carrier(flight)
             carrier = await carrier_loc.inner_text()
 
@@ -223,7 +220,6 @@ class FlightInfo(BasePage):
         # Getting layover count at index 3 in each row (after the header row)
         layover_column = [row[3] for row in flight_data[1:] if len(row) > 3]
 
-        # check if there is no results message
         
         # If no results message is shown and all extracted layover values are within allowed stops, we return True
         if no_results and all(stop in allowed_stops for stop in layover_column):
@@ -232,23 +228,20 @@ class FlightInfo(BasePage):
 
         # Otherwise, check the flight cards one by one
         flights_available = await self.get_flight_cards()
-        print(f"Number of stops for {trip_stops} are: ")
+        print(f"\033[1m" + "Number of stops for {trip_stops} are: " + "\033[1m")
 
         for flight in flights_available:
-            self.wait_for_loaded_state()
-            self.wait_for_element(flight)
-
             stops = await self.layover_count(flight)
             print(f"{stops}\n")
             if stops not in allowed_stops:
                 return False
         return True
 
-    async def layover_count (self, flight):
+    async def layover_count (self, flight, timeout=5000):
         layovers_loc = await self.get_layover_count(flight)
         try:
-            if await layovers_loc.count() > 0:  
-                layovers = await layovers_loc.inner_text()
+            if layovers_loc:  
+                layovers = await layovers_loc.inner_text(timeout=timeout)
                 layovers_count = int(layovers.strip())
             else:
                 layovers_count = 0  # If no element found, assume 0 layovers
