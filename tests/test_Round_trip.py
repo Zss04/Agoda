@@ -2,11 +2,6 @@ import pytest
 from pages.Round_Trip import RoundTrip
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("departure_airport, arrival_airport , adults, children, infants, cabin",
-                            [
-                             ("Jinnah International Airport", "John F. Kennedy", 2 , 1, 0, "Business"),
-                             ("Allama Iqbal International Airport", "Istanbul Airport", 1 , 0, 0, "Economy")
-                            ])
 async def test_flight_booking(page_tuple, departure_airport, arrival_airport, adults, children, infants, cabin):
     page, set_url = page_tuple
     rt = RoundTrip(page)
@@ -14,6 +9,7 @@ async def test_flight_booking(page_tuple, departure_airport, arrival_airport, ad
     # Go to Agoda website and wait for logo
     await page.goto("https://agoda.com")
     await rt.wait_for_agoda_image()
+    
     # Locate and click on Flights tab
     await rt.click_flights()
     assert await rt.flights_is_clicked() == "true", "Flights tab was not clicked"
@@ -24,7 +20,7 @@ async def test_flight_booking(page_tuple, departure_airport, arrival_airport, ad
     await rt.select_departure_airport(departure_airport)
     await rt.select_arrival_airport(arrival_airport)
 
-    # fill in calender dates and select cabin and passengers
+    # fill in calendar dates and select cabin and passengers
     await rt.set_departure_date()
     await rt.set_return_date()
     assert await rt.is_departure_date_selected(), "Departure date was not selected"

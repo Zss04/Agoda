@@ -1,6 +1,5 @@
 import pytest
-from playwright.async_api import async_playwright
-from pages.flightinfo import FlightInfo
+from pages.flight_options import FlightInfo
 from tabulate import tabulate
 
 
@@ -20,9 +19,6 @@ async def test_flight_data(page_tuple):
     trip = FlightInfo(page)    # creates instance  of flightinfo class
     await page.goto(get_url["url"])
     flight_data_2d = await trip.flight_data()  # Call flight_data on the instance
-    if flight_data_2d == True:
-        print("No flights available for these dates")
-        return 
     print("\nFlight Data (Array):")
     # arranges all data in a table
     print(tabulate(flight_data_2d, headers="firstrow", tablefmt="grid"))

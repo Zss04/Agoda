@@ -1,3 +1,4 @@
+import pytest
 from playwright.async_api import Page
 from urllib.parse import urlparse, parse_qs
 
@@ -137,7 +138,8 @@ class FlightInfo(BasePage):
         return_calendar_button = await self.get_search_calender_arrival()
         await return_calendar_button.click()
 
-        
+        await PlaywrightHelper.wait_1000(self)  
+
         return_date_element = await self.get_search_return_date()
         return_date = await return_date_element.get_attribute("data-selenium-date")
         header_data.append(return_date)
@@ -167,15 +169,19 @@ class FlightInfo(BasePage):
         return header_data
 
     async def flight_data(self) -> list[list[str]]:
-        # check if results are available
-        no_results = await self.check_no_flights_message()
-        if no_results:
-            return [["No flights available for these dates."]]
+        """
+        Collects and organizes flight data into a structured 2D array.
+        
+        Returns:
+            list[list[str]]: A 2D array with flight information including carrier, duration, price, and layovers
+        """
+        # Check if results are available
+        if await self.check_no_flights_message():
+            pytest.fail("No flights available for these dates")
         
         # check all flight options and store headings in 2D array
         flight_loc = await self.get_flight_cards()
         flight_data_2d = [["Carrier", "Duration", "Price", "Layovers"]]
-
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
         for flight in flight_loc:
             carrier_loc = await self.get_flight_carrier(flight)
@@ -198,9 +204,19 @@ class FlightInfo(BasePage):
                 [carrier.strip(), duration.strip(), f"{price.strip()} {currency.strip()}", stops ])
 
         return flight_data_2d
-    
-    
+        
+
     async def process_flight_option(self, checkbox_getter, allowed_stops: list) -> bool:
+        """
+        Processes flight options by clicking a filter checkbox and validating layover counts.
+        
+        Args:
+            checkbox_getter: Function to get the checkbox element
+            allowed_stops: List of allowed layover counts (e.g., [0] for direct, [0,1] for direct and one-stop)
+        
+        Returns:
+            bool: True if all flights match the allowed stops criteria, False otherwise
+        """
         # Click the appropriate checkbox and wait for the page to load
         await self.click_checkbox_and_wait(checkbox_getter)
         
@@ -211,51 +227,44 @@ class FlightInfo(BasePage):
         else: 
             trip_stops = "2+ stops"
         
-        flight_data = await self.flight_data()
-        no_results = await self.check_no_flights_message()
-        # Getting layover count at index 3 in each row (after the header row)
-        layover_column = [row[3] for row in flight_data[1:] if len(row) > 3]
+        try:
+        # Check each flight against the criteria
+            flights_available = await self.get_flight_cards()
+            print(f"Number of stops for {trip_stops} are: ")
 
-        
-        # If no results message is shown and all extracted layover values are within allowed stops, we return True
-        if no_results and all(stop in allowed_stops for stop in layover_column):
-            print(f"There were no flights available for these days for {trip_stops}")
+            for flight in flights_available:
+                stops = await self.layover_count(flight)
+                print(f"{stops}\n")
+                if stops not in allowed_stops:
+                    return False
             return True
-
-        # Otherwise, check the flight cards one by one
-        flights_available = await self.get_flight_cards()
-        print(f"\033[1m" + "Number of stops for {trip_stops} are: " + "\033[1m")
-
-        for flight in flights_available:
-            stops = await self.layover_count(flight)
-            print(f"{stops}\n")
-            if stops not in allowed_stops:
-                return False
-        return True
+        except Exception as e:
+            print(f"No flights available for this trip option {trip_stops}: {e}")
+            
 
     async def layover_count (self, flight, timeout=5000):
-        layovers_loc = await self.get_layover_count(flight)
         try:
+            layovers_loc = await self.get_layover_count(flight)
             if layovers_loc:  
                 layovers = await layovers_loc.inner_text(timeout=timeout)
                 layovers_count = int(layovers.strip())
             else:
                 layovers_count = 0  # If no element found, assume 0 layovers
-        except Exception as e: 
+        except Exception as e:
             print(f"Error retrieving layover count: {e}")
             layovers_count = 0
         return layovers_count
         
-    async def check_no_flights_message(self) -> bool:
+    async def check_no_flights_message(self) :
         try:
             await self.wait_for_loaded_state()
             no_results = await self.get_no_results_page()
             if no_results:
-                return True  # Indicates that the "no flights" message is displayed
-            return False  # Indicates that flights are available
+                pytest.fail("No flights available for these dates")  # Indicates that the "no flights" message is displayed
+            
         except Exception as e:
             print(f"Error checking for no flights message: {e}")
-            return False  # Assume flights are available if there's an error
+            
 
     async def click_checkbox_and_wait(self, checkbox_getter) -> None:
         checkbox = await checkbox_getter()
@@ -267,7 +276,7 @@ class FlightInfo(BasePage):
     async def flight_direct_stop(self) -> bool:
         no_results = await self.check_no_flights_message()
         if no_results:
-            return True
+            pytest.fail("No flights available for these dates")
         return await self.process_flight_option(self.get_direct_stop_checkbox, [0])
 
     # One-stop flights can have either 0 or 1 stop.

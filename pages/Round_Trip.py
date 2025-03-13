@@ -104,14 +104,14 @@ class RoundTrip(BasePage):
 
     def departure_date_generator(self) -> str:
         # Get tomorrows date
-        departure_date = (datetime.today() + timedelta(days=10))
+        departure_date = (datetime.today() + timedelta(days=20))
         # Format the dates in (YYYY-MM-DD) format
         departure_date_str = PlaywrightHelper.format_date(departure_date)
         return departure_date_str
 
     def return_date_generator(self) -> str:
         # Get return date
-        return_date = (datetime.today() + timedelta(days=29))
+        return_date = (datetime.today() + timedelta(days=40))
         # Format the dates in (YYYY-MM-DD) format
         return_date_str = PlaywrightHelper.format_date(return_date)
         return return_date_str
@@ -149,8 +149,8 @@ class RoundTrip(BasePage):
     async def _set_and_verify_airport(self, airport_name: str, set_airport_func, get_airport_func, airport_label: str) -> None:
         # Set the airport via the search box.
         await set_airport_func(airport_name)
-        await PlaywrightHelper.wait_1000()
-        
+        await PlaywrightHelper.wait_1000(self)
+
         # Select the airport from the options and extract its code.
         selected_text = await self.select_airport_options(airport_name)
         selected_code = self.extract_airport_code(selected_text)
