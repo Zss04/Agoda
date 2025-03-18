@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 import pytest_asyncio
 import pytest_html
 import os
@@ -7,12 +6,20 @@ import json
 from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
+from utils.logger_config import setup_logging, get_logger
 
+# Set up logging at the module level
+logger = setup_logging("conftest")
 
 def pytest_addoption(parser):
     """Add command-line options for test parameters."""
     parser.addoption("--testParameters", action="store", default=None,
                     help="Use test parameters from package.json")
+    logger.info("Added command-line option: --testParameters")
+
+def pytest_sessionstart(session):
+    """Called after the Session object has been created and before tests are collected."""
+    logger.info(f"Test session started: {session.config.rootdir}")
 
 def pytest_generate_tests(metafunc):
     """
@@ -29,12 +36,15 @@ def pytest_generate_tests(metafunc):
         if params:
             # Use command line parameters if provided
             try:
+                logger.info(f"Loading test parameters from package.json for {metafunc.function.__name__}")
                 project_root = os.path.dirname(os.path.abspath(__file__))
                 json_path = os.path.join(project_root, 'package.json')
                 
+                # Read the package.json file in read mode
                 with open(json_path, 'r') as f:
                     data = json.load(f)
                 
+                # Check if 'testParameters' key exists in the JSON data
                 if 'testParameters' in data:
                     test_params = [
                         (
@@ -46,30 +56,39 @@ def pytest_generate_tests(metafunc):
                             param.get('class', 'Economy')
                         ) for param in data['testParameters']
                     ]
+                    logger.info(f"Loaded {len(test_params)} parameter sets from package.json")
+                else:
+                    logger.warning("No 'testParameters' key found in package.json")
             except Exception as e:
-                print(f"Error loading parameters: {e}")
+                logger.error(f"Error loading parameters: {e}")
         
         # Parametrize the test function
         metafunc.parametrize(
             ["departure_airport", "arrival_airport", "adults", "children", "infants", "cabin"],
             test_params
         )
+        logger.info(f"Parametrized {metafunc.function.__name__} with {len(test_params)} parameter sets")
 
 
 @pytest_asyncio.fixture(scope="session")
 async def search_url():
     """Provides a base URL dictionary for tests."""
+    logger.info("Creating search_url fixture")
     return {"url": None}
 
 
 @pytest_asyncio.fixture(scope="function")
 async def browser():
     """Launches and manages a browser instance for each test."""
+    logger.info("Launching browser")
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         if browser is None:
+            logger.error("Browser failed to launch")
             pytest.fail("The browser did not load.")
+        logger.info(f"Browser launched successfully: {browser}")
         yield browser
+        logger.info("Closing browser")
         await browser.close()
 
 
@@ -79,15 +98,23 @@ async def page_tuple(browser, search_url, request, create_screenshot_directory):
     Creates a page for testing and handles cleanup.
     Takes screenshots on test failure.
     """
+    logger.info(f"Creating new page for test: {request.node.name}")
     page = await browser.new_page()
     if page is None:
+        logger.error("Failed to create new page")
         pytest.fail("The page did not load.")
     
+    logger.info(f"Page created successfully: {page}")
     yield page, search_url
     
     # Take screenshot if test failed
     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
+        logger.info(f"Test failed, capturing screenshot for: {request.node.name}")
         await capture_screenshot(page, request, create_screenshot_directory)
+    else:
+        logger.info(f"Test completed: {request.node.name}")
+    
+    logger.info("Closing page")
     await page.close()
 
 
@@ -98,17 +125,21 @@ def create_screenshot_directory():
     Clears any existing screenshots to avoid accumulation.
     """
     screenshot_dir = os.path.expanduser("~/Downloads/agoda/Reports/Images/")
+    logger.info(f"Creating screenshot directory: {screenshot_dir}")
     os.makedirs(screenshot_dir, exist_ok=True)
     
     # Clear any existing files in the directory
+    file_count = 0
     for file in os.listdir(screenshot_dir):
         file_path = os.path.join(screenshot_dir, file)
         try:
             if os.path.isfile(file_path):
                 os.unlink(file_path)
+                file_count += 1
         except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
+            logger.error(f"Error deleting file {file_path}: {e}")
     
+    logger.info(f"Cleared {file_count} existing screenshots from directory")
     return screenshot_dir
 
 
@@ -117,14 +148,24 @@ async def capture_screenshot(page, request, screenshot_dir):
     screenshot_path = os.path.join(
         screenshot_dir, f"{request.node.name}_{datetime.now().strftime('%Y%m%d_%H%M')}.png"
     )
+    logger.info(f"Capturing screenshot to: {screenshot_path}")
+    
     # Capture screenshot
-    await page.screenshot(path=screenshot_path)
+    try:
+        await page.screenshot(path=screenshot_path)
+        logger.info("Screenshot captured successfully")
+    except Exception as e:
+        logger.error(f"Error capturing screenshot: {e}")
+        return
     
     # Add to report if file exists
     if os.path.exists(screenshot_path):
+        logger.info("Adding screenshot to HTML report")
         extras = getattr(request.node.rep_call, "extras", [])
         extras.append(pytest_html.extras.image(screenshot_path))
         request.node.rep_call.extras = extras
+    else:
+        logger.error(f"Screenshot file not found: {screenshot_path}")
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -138,6 +179,17 @@ def pytest_runtest_makereport(item, call):
     
     # Store the test reports on the test item for later use
     setattr(item, f"rep_{report.when}", report)
+    
+    # Log test status
+    if report.when == "call":
+        if report.passed:
+            logger.info(f"Test PASSED: {item.name}")
+        elif report.failed:
+            logger.error(f"Test FAILED: {item.name}")
+            if hasattr(report, "longrepr"):
+                logger.error(f"Error: {report.longrepr}")
+        elif report.skipped:
+            logger.info(f"Test SKIPPED: {item.name}")
 
 
 def pytest_html_report_title(report):

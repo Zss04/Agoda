@@ -8,7 +8,7 @@ async def test_flight_booking(page_tuple, departure_airport, arrival_airport, ad
 
     # Go to Agoda website and wait for logo
     await page.goto("https://agoda.com")
-    await rt.wait_for_agoda_image()
+    assert await rt.wait_for_agoda_image(), "Agoda image not found. Website is not loaded"
     
     # Locate and click on Flights tab
     await rt.click_flights()
