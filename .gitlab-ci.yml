@@ -5,13 +5,16 @@ stages:
   - test
 
 before_script:
+  - python -m venv venv 
+  - source venv/bin/activate 
+  - pip install --upgrade pip
+  - pip install -r requirements.txt  
+  - playwright install 
+
+build:
   stage: build
   script:
-    - python -m venv venv 
-    - source venv/bin/activate 
-    - pip install --upgrade pip
-    - pip install -r requirements.txt  
-    - playwright install 
+    - echo "Build stage completed."
 
 test-playwright:
   stage: test
