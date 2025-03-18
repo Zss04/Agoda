@@ -1,0 +1,19 @@
+image: python:3.12  
+
+stages:
+  - test
+
+before_script:
+  - python -m venv venv 
+  - source venv/bin/activate 
+  - pip install -r requirements.txt  
+  - playwright install 
+
+test-playwright:
+  stage: test
+  script:
+    - source venv/bin/activate  
+    - pytest -v -s --html=Reports/report.html
+  artifacts:
+    paths:
+      - Reports/report.html  
