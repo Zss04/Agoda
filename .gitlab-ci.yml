@@ -1,13 +1,16 @@
-image: python:3.12  
+image: python:3.13.2  
 
 stages:
+  - build
   - test
 
 before_script:
-  - python -m venv venv 
-  - source venv/bin/activate 
-  - pip install -r requirements.txt  
-  - playwright install 
+  stage: build
+  script:
+    - python -m venv venv 
+    - source venv/bin/activate 
+    - pip install -r requirements.txt  
+    - playwright install 
 
 test-playwright:
   stage: test
