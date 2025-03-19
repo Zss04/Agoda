@@ -11,12 +11,12 @@ before_script:
   - pip install -r requirements.txt  
   - playwright install 
 
-build:
+build-job:
   stage: build
   script:
     - echo "Build stage completed."
 
-test-playwright:
+test-job:
   stage: test
   script:
     - source venv/bin/activate  
