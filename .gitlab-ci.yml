@@ -2,8 +2,17 @@ stages:
   - build
   - test
 
+<<<<<<< HEAD
 variables:
   PYTHONPATH: "$CI_PROJECT_DIR"
+=======
+before_script:
+  - python3 -m venv venv 
+  - source venv/bin/activate 
+  - pip install --upgrade pip
+  - pip install -r requirements.txt  
+  - playwright install 
+>>>>>>> 0e9fa56 (Trigger pipeline with shell executor)
 
 build-job:
   stage: build
