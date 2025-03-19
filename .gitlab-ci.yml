@@ -24,3 +24,4 @@ test-playwright:
   artifacts:
     paths:
       - Reports/report.html  
+      - Reports/Images/
