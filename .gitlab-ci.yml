@@ -5,7 +5,6 @@ stages:
   - test
 
 before_script:
-  - docker pull python
   - python -m venv venv 
   - source venv/bin/activate 
   - pip install --upgrade pip
