@@ -17,6 +17,7 @@ async def test_flight_booking(page_tuple, departure_airport, arrival_airport, ad
     await rt.select_roundtrip()
     assert await rt.is_round_trip_selected(), "Round trip was not selected"
 
+    await rt.close_popups()
     await rt.select_departure_airport(departure_airport)
     await rt.select_arrival_airport(arrival_airport)
 
