@@ -23,5 +23,4 @@ test-job:
     - pytest -v -s --html=Reports/report.html
   artifacts:
     paths:
-      - Reports/report.html  
-      - Reports/Images/
+      - ~/Downloads/agoda/Reports/
