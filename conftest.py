@@ -3,11 +3,14 @@ import pytest_asyncio
 import pytest_html
 import os
 import json
+import sys
 from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
 
-# Set up logging at the module level
+# Add the project root directory to Python path
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
 
 def pytest_addoption(parser):
     """Add command-line options for test parameters."""
