@@ -127,7 +127,6 @@ def create_screenshot_directory(request):
     Create the screenshot directory at the start of the session.
     Uses the artifacts directory if specified in command line options.
     """
-<<<<<<< HEAD
     screenshot_dir = os.path.expanduser("~/Downloads/agoda/Reports/Images/")
     logger.info(f"Creating screenshot directory: {screenshot_dir}")
     os.makedirs(screenshot_dir, exist_ok=True)
@@ -142,26 +141,6 @@ def create_screenshot_directory(request):
                 file_count += 1
         except Exception as e:
             logger.error(f"Error deleting file {file_path}: {e}")
-=======
-    # Get artifacts directory from command line option
-    artifacts_dir = request.config.getoption("--artifacts-dir")
-    screenshot_dir = os.path.join(artifacts_dir, "screenshots")
-    
-    # Create directory if it doesn't exist
-    os.makedirs(screenshot_dir, exist_ok=True)
-    
-    # Don't clear existing files in CI environment to preserve all artifacts
-    is_ci = os.environ.get("CI", "false").lower() == "true"
-    if not is_ci:
-        # Clear any existing files in the directory (only in local development)
-        for file in os.listdir(screenshot_dir):
-            file_path = os.path.join(screenshot_dir, file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception:
-                pass
->>>>>>> 35f4cc7 (added docker runner)
     
     logger.info(f"Cleared {file_count} existing screenshots from directory")
     return screenshot_dir
@@ -169,27 +148,17 @@ def create_screenshot_directory(request):
 
 async def capture_screenshot(page, request, screenshot_dir):
     """Capture screenshot on test failure and add it to HTML report."""
-<<<<<<< HEAD
     screenshot_path = os.path.join(
         screenshot_dir, f"{request.node.name}_{datetime.now().strftime('%Y%m%d_%H%M')}.png"
     )
     logger.info(f"Capturing screenshot to: {screenshot_path}")
-=======
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    screenshot_filename = f"{request.node.name}_{timestamp}.png"
-    screenshot_path = os.path.join(screenshot_dir, screenshot_filename)
->>>>>>> 35f4cc7 (added docker runner)
     
     # Capture screenshot
     try:
         await page.screenshot(path=screenshot_path)
-<<<<<<< HEAD
         logger.info("Screenshot captured successfully")
     except Exception as e:
         logger.error(f"Error capturing screenshot: {e}")
-=======
-    except Exception:
->>>>>>> 35f4cc7 (added docker runner)
         return
     
     # Add to report if file exists
