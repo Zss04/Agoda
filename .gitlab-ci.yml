@@ -22,5 +22,5 @@ test-job:
     - pytest -v -s tests/ --html=Reports/report.html 
   artifacts:
     paths:
-      - /Reports
-
+      - Reports/
+    expire_in: 1 week
