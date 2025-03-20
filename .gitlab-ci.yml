@@ -19,8 +19,8 @@ test-job:
   stage: test
   script:
     - source venv/bin/activate  
-    - pytest -v -s tests/ --html=Reports/report.html 
+    - pytest -v -s tests/ --html=$CI_PROJECT_DIR/artifacts
   artifacts:
     paths:
-      - Reports/report.html
+      - artifacts/
     expire_in: 1 week
