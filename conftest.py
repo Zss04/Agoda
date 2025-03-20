@@ -3,7 +3,6 @@ import pytest_asyncio
 import pytest_html
 import os
 import json
-import sys
 from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
