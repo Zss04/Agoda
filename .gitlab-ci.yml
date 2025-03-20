@@ -19,9 +19,9 @@ test-job:
   stage: test
   script:
     - source venv/bin/activate  
-    - pytest -v -s tests/ --html=Reports/report.html 
+    - pytest -v -s --html=Reports/report.html tests/
   artifacts:
     paths:
-      - Reports/report.html
+      - Reports/
     when: always
     expire_in: 1 week
