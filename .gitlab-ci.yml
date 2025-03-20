@@ -21,7 +21,6 @@ variables:
 test-job:
   stage: test
   script:
-    - python -c "import sys; print(sys.path)"
     - source venv/bin/activate  
     - pytest -v -s tests/ --html=Reports/report.html 
   artifacts:

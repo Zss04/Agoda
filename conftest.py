@@ -3,20 +3,35 @@ import pytest_asyncio
 import pytest_html
 import os
 import json
+import sys
 from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
 
-# Set up logging at the module level
+# Add the project root directory to Python path
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
 
 def pytest_addoption(parser):
-    """Add command-line options for test parameters."""
+    """Add command-line options for test parameters and report paths."""
     parser.addoption("--testParameters", action="store", default=None,
                     help="Use test parameters from package.json")
+    parser.addoption("--artifacts-dir", action="store", 
+                    default=os.path.join(project_root, "artifacts"),
+                    help="Directory to store test artifacts (screenshots, reports)")
 
 def pytest_sessionstart(session):
     """Called after the Session object has been created and before tests are collected."""
-    pass
+    # Create artifacts directory if it doesn't exist
+    artifacts_dir = session.config.getoption("--artifacts-dir")
+    os.makedirs(artifacts_dir, exist_ok=True)
+    
+    # Create subdirectories for different artifact types
+    screenshots_dir = os.path.join(artifacts_dir, "screenshots")
+    reports_dir = os.path.join(artifacts_dir, "reports")
+    
+    os.makedirs(screenshots_dir, exist_ok=True)
+    os.makedirs(reports_dir, exist_ok=True)
 
 def pytest_generate_tests(metafunc):
     """
@@ -74,7 +89,9 @@ async def search_url():
 async def browser():
     """Launches and manages a browser instance for each test."""
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        # Use headless mode in CI environment (typical for CI/CD pipelines)
+        is_ci = os.environ.get("CI", "false").lower() == "true"
+        browser = await p.chromium.launch(headless=is_ci)
         if browser is None:
             pytest.fail("The browser did not load.")
         yield browser
@@ -100,39 +117,44 @@ async def page_tuple(browser, search_url, request, create_screenshot_directory):
     await page.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def create_screenshot_directory():
+@pytest.fixture(scope="session")
+def create_screenshot_directory(request):
     """
     Create the screenshot directory at the start of the session.
-    Clears any existing screenshots to avoid accumulation.
+    Uses the artifacts directory if specified in command line options.
     """
-    screenshot_dir = os.path.expanduser("~/Downloads/agoda/Reports/Images/")
+    # Get artifacts directory from command line option
+    artifacts_dir = request.config.getoption("--artifacts-dir")
+    screenshot_dir = os.path.join(artifacts_dir, "screenshots")
+    
+    # Create directory if it doesn't exist
     os.makedirs(screenshot_dir, exist_ok=True)
     
-    # Clear any existing files in the directory
-    file_count = 0
-    for file in os.listdir(screenshot_dir):
-        file_path = os.path.join(screenshot_dir, file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-                file_count += 1
-        except Exception as e:
-            pass
+    # Don't clear existing files in CI environment to preserve all artifacts
+    is_ci = os.environ.get("CI", "false").lower() == "true"
+    if not is_ci:
+        # Clear any existing files in the directory (only in local development)
+        for file in os.listdir(screenshot_dir):
+            file_path = os.path.join(screenshot_dir, file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception:
+                pass
     
     return screenshot_dir
 
 
 async def capture_screenshot(page, request, screenshot_dir):
     """Capture screenshot on test failure and add it to HTML report."""
-    screenshot_path = os.path.join(
-        screenshot_dir, f"{request.node.name}_{datetime.now().strftime('%Y%m%d_%H%M')}.png"
-    )
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    screenshot_filename = f"{request.node.name}_{timestamp}.png"
+    screenshot_path = os.path.join(screenshot_dir, screenshot_filename)
     
     # Capture screenshot
     try:
         await page.screenshot(path=screenshot_path)
-    except Exception as e:
+    except Exception:
         return
     
     # Add to report if file exists
@@ -155,8 +177,34 @@ def pytest_runtest_makereport(item, call):
     setattr(item, f"rep_{report.when}", report)
 
 
+def pytest_configure(config):
+    """Configure HTML report generation with timestamp and register markers."""
+    # Generate timestamped report filename for unique report in CI
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    artifacts_dir = config.getoption("--artifacts-dir")
+    reports_dir = os.path.join(artifacts_dir, "reports")
+    
+    # Create HTML report config
+    html_report_path = os.path.join(reports_dir, f"report_{timestamp}.html")
+    
+    # Register the HTML report path
+    if not hasattr(config, "_metadata"):
+        config._metadata = {}
+    config._metadata["Report Path"] = html_report_path
+    
+    # Configure HTML report
+    config.option.htmlpath = html_report_path
+    
+    # Register custom markers
+    config.addinivalue_line("markers", "agoda: mark tests as part of the Agoda test suite")
+
+
 def pytest_html_report_title(report):
     """Sets the title for the HTML report."""
+    is_ci = os.environ.get("CI", "false").lower() == "true"
+    ci_info = " (CI/CD Pipeline)" if is_ci else ""
+    
     module_name = "Agoda Flight Booking"
-    report.title = f"Test Report: {module_name}"        
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    report.title = f"Test Report: {module_name}{ci_info} - {timestamp}"        
 
