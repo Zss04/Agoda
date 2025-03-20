@@ -2,9 +2,6 @@ stages:
   - build
   - test
 
-variables:
-  PYTHONPATH: "$CI_PROJECT_DIR"
-
 build-job:
   stage: build
   script:
@@ -30,11 +27,6 @@ test-job:
     - pytest -v -s tests/ --test-browser=$BROWSER --headless=True --html=Reports/report.html
   artifacts:
     paths:
-<<<<<<< HEAD
       - Reports/report.html
     when: always
     expire_in: 1 week
-
-=======
-      - ~/Downloads/agoda/Reports/
->>>>>>> a177b9c (Trigger pipeline with shell executor)
