@@ -15,7 +15,7 @@ async def test_flight_booking(page_tuple):
     await rt.flights_is_clicked()
     
     await rt.select_trip_type("roundTrip")
-    await rt.set_departure_airport("bubub")
+    await rt.set_departure_airport("LHE")
     await rt.set_arrival_airport("KHI")
 
     # fill in calender dates and select cabin and passengers

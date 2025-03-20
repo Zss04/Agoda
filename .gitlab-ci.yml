@@ -15,11 +15,16 @@ build-job:
   script:
     - echo "Build stage completed."
 
+variables:
+  PYTHONPATH: "$CI_PROJECT_DIR"
+
 test-job:
   stage: test
   script:
+    - ls -R
+    - python -c "import sys; print(sys.path)"
     - source venv/bin/activate  
-    - pytest -v -s --html=Reports/report.html tests/
+    - pytest -v -s tests/ --html=Reports/report.html 
   artifacts:
     paths:
       - Reports/
