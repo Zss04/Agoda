@@ -10,6 +10,7 @@ build-job:
 lint-job:
   stage: test
   script:
+<<<<<<< HEAD
     - flake8 .
 
 test-job:
@@ -30,3 +31,12 @@ test-job:
       - Reports/report.html
     when: always
     expire_in: 1 week
+=======
+    - source venv/bin/activate  
+    - pytest -v -s tests/ --html=Reports/report.html 
+  artifacts:
+    paths:
+      - /Reports
+      when: always
+      expire_in: 1 week
+>>>>>>> 49433a2 (fixing artifact issues)
