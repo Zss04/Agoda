@@ -19,7 +19,7 @@ test-job:
   stage: test
   script:
     - source venv/bin/activate  
-    - pytest -v -s --html=Reports/report.html
+    - pytest -v -s . --html=Reports/report.html 
   artifacts:
     paths:
       - ~/Downloads/agoda/Reports/

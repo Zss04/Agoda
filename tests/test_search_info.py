@@ -1,5 +1,4 @@
 import pytest
-from playwright.async_api import async_playwright
 from pages.flightinfo import test_flightInfo
 from tabulate import tabulate
 
