@@ -9,14 +9,8 @@ from playwright.async_api import async_playwright
 import pytest_html.extras
 from utils.logger_config import setup_logging, get_logger
 
-<<<<<<< HEAD
 # Set up logging at the module level
 logger = setup_logging("conftest")
-=======
-# Add the project root directory to Python path
-project_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, project_root)
->>>>>>> 49433a2 (fixing artifact issues)
 
 def pytest_addoption(parser):
     """Add command-line options for test parameters."""
