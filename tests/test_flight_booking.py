@@ -1,8 +1,8 @@
 import pytest
 from pages.flight_frontdoor import test_roundTrip
 
-
 @pytest.mark.asyncio
+@pytest.mark.agoda
 async def test_flight_booking(page_tuple):
     page, set_url = page_tuple
     rt = test_roundTrip(page)

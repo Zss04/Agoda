@@ -1,14 +1,8 @@
-image: python:3.13
-
 stages:
   - build
   - test
 
-before_script:
-  - python3 -m venv venv 
-  - source venv/bin/activate 
-  - pip install -r requirements.txt  
-  - playwright install 
+
 
 build-job:
   stage: build
@@ -20,6 +14,13 @@ variables:
 
 test-job:
   stage: test
+  image:python:3.13-slim
+  before_script:
+  - python3 -m venv venv 
+  - source venv/bin/activate 
+  - pip install -r requirements.txt  
+  - playwright install 
+
   script:
     - source venv/bin/activate  
     - pytest -v -s tests/ --html=Reports/report.html 
@@ -28,3 +29,5 @@ test-job:
       - Reports/
     when: always
     expire_in: 1 week
+  tags:
+    - agoda

@@ -4,6 +4,7 @@ from tabulate import tabulate
 
 
 @pytest.mark.asyncio
+@pytest.mark.agoda
 async def test_verify_search_results(page_tuple):
     # create an instance of trip options class
     page, get_url = page_tuple
@@ -15,6 +16,7 @@ async def test_verify_search_results(page_tuple):
 
 
 @pytest.mark.asyncio
+@pytest.mark.agoda
 async def test_flight_data(page_tuple):
     page, get_url = page_tuple   # recieves tuple from page fixture
     trip = test_flightInfo(page)    # creates instance  of flightinfo class
