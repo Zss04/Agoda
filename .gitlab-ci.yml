@@ -15,12 +15,10 @@ test-job:
   image: mcr.microsoft.com/playwright/python:v1.51.0-noble
 
   before_script:
-    - python3 -m venv venv
-    - source venv/bin/activate
+    - pip install --upgrade pip
     - pip install -r requirements.txt
     - playwright install --with-deps
   script:
-    - source venv/bin/activate
     - pytest -v -s tests/ --html=Reports/report.html
   artifacts:
     paths:
