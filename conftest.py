@@ -74,7 +74,7 @@ async def search_url():
 async def browser():
     """Launches and manages a browser instance for each test."""
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         if browser is None:
             pytest.fail("The browser did not load.")
         yield browser
