@@ -13,6 +13,7 @@ build-job:
 test-job:
   stage: test
   image: python:3.13-slim
+
   before_script:
     - python3 -m venv venv
     - source venv/bin/activate
