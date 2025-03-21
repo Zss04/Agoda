@@ -2,28 +2,25 @@ stages:
   - build
   - test
 
-
+variables:
+  PYTHONPATH: "$CI_PROJECT_DIR"
 
 build-job:
   stage: build
   script:
     - echo "Build stage completed."
 
-variables:
-  PYTHONPATH: "$CI_PROJECT_DIR"
-
 test-job:
   stage: test
-  image:python:3.13-slim
+  image: python:3.13-slim
   before_script:
-  - python3 -m venv venv 
-  - source venv/bin/activate 
-  - pip install -r requirements.txt  
-  - playwright install 
-
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+    - playwright install
   script:
-    - source venv/bin/activate  
-    - pytest -v -s tests/ --html=Reports/report.html 
+    - source venv/bin/activate
+    - pytest -v -s tests/ --html=Reports/report.html
   artifacts:
     paths:
       - Reports/
