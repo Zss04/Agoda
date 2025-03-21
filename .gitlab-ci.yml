@@ -1,6 +1,9 @@
 stages:
   - build
   - test
+  
+variables:
+  PYTHONPATH: "$CI_PROJECT_DIR"
 
 build-job:
   stage: build
@@ -30,5 +33,4 @@ test-job:
       - Reports/
     when: always
     expire_in: 1 week
-  tags:
-    - agoda
+
