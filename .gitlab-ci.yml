@@ -12,13 +12,13 @@ build-job:
 
 test-job:
   stage: test
-  image: mcr.microsoft.com/playwright/python:v1.42.0-jammy
+  image: mcr.microsoft.com/playwright/python:v1.51.0-noble
 
   before_script:
     - python3 -m venv venv
     - source venv/bin/activate
     - pip install -r requirements.txt
-    - playwright install
+    - playwright install --with-deps
   script:
     - source venv/bin/activate
     - pytest -v -s tests/ --html=Reports/report.html
