@@ -82,7 +82,7 @@ async def browser():
     """Launches and manages a browser instance for each test."""
     logger.info("Launching browser")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         if browser is None:
             logger.error("Browser failed to launch")
             pytest.fail("The browser did not load.")
