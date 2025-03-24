@@ -13,13 +13,16 @@ build-job:
 test-job:
   stage: test
   image: mcr.microsoft.com/playwright/python:v1.51.0-noble
+  parallel:
+    matrix:
+      - BROWSER: ["chromium", "firefox", "webkit"]
 
   before_script:
     - pip install --upgrade pip
     - pip install -r requirements.txt
     - playwright install --with-deps
   script:
-    - pytest -v -s tests/ --html=Reports/report.html
+    - pytest -v -s tests/ --browser=$BROWSER --html=Reports/report.html
   artifacts:
     paths:
       - Reports/
