@@ -71,9 +71,9 @@ async def search_url():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def browser(metafunc):
+async def browser(request):
     """Launches and manages a browser instance for each test."""
-    browser_name = metafunc.config.getoption("--test-browser")
+    browser_name = request.config.getoption("--test-browser")
 
     async with async_playwright() as p:
         if browser_name == "chromium":
