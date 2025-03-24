@@ -17,9 +17,15 @@ def pytest_addoption(parser):
                     help="Use test parameters from package.json")
     logger.info("Added command-line option: --testParameters")
 
+    parser.addoption("--test-browser", action="store", default="chromium",
+                     choices=["chromium", "firefox", "webkit"],
+                     help="Specify the browser to run tests on (chromium, firefox, webkit)")
+
 def pytest_sessionstart(session):
     """Called after the Session object has been created and before tests are collected."""
     logger.info(f"Test session started: {session.config.rootdir}")
+   
+
 
 def pytest_generate_tests(metafunc):
     """
@@ -78,15 +84,19 @@ async def search_url():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def browser():
+async def browser(metafunc):
     """Launches and manages a browser instance for each test."""
+    browser_name = metafunc.config.getoption("--test-browser")
     logger.info("Launching browser")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        if browser is None:
-            logger.error("Browser failed to launch")
-            pytest.fail("The browser did not load.")
-        logger.info(f"Browser launched successfully: {browser}")
+        if browser_name == "chromium":
+            browser = await p.chromium.launch(headless=True)
+        elif browser_name == "firefox":
+            browser = await p.firefox.launch(headless=True)
+        elif browser_name == "webkit":
+            browser = await p.webkit.launch(headless=True)
+        else:
+            pytest.fail(f"Unsupported browser: {browser_name}")
         yield browser
         logger.info("Closing browser")
         await browser.close()

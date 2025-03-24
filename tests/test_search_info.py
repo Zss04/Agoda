@@ -2,7 +2,6 @@ import pytest
 from pages.flightinfo import test_flightInfo
 from tabulate import tabulate
 
-
 @pytest.mark.asyncio
 async def test_verify_search_results(page_tuple):
     # create an instance of trip options class
@@ -12,7 +11,6 @@ async def test_verify_search_results(page_tuple):
     await trip.validate_search(get_url["url"])
     print("search validated")
     return None 
-
 
 @pytest.mark.asyncio
 async def test_flight_data(page_tuple):
