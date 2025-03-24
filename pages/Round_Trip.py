@@ -88,6 +88,10 @@ class RoundTrip(BasePage):
     async def get_passengers_and_cabin_count(self) -> Locator | None:
         return await self.get_element("//div[@data-component='flight-search-occupancy']//div[@class='SearchBoxTextDescription__title']")
 
+    async def close_popups (self):
+        await self.click_element("//button[@data-element-name='prominent-app-download-floating-button']")
+
+
     async def set_departure_airport(self, airport_name: str, timeout = 2000) -> None:
         logger.debug(f"Setting departure airport to: {airport_name}")
         departure_airport = await self.get_departure_airport()
