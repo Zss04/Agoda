@@ -13,7 +13,7 @@ def pytest_addoption(parser):
     """Add command-line options for test parameters."""
     parser.addoption("--testParameters", action="store", default=None,
                     help="Use test parameters from package.json")
-    parser.addoption("--browser", action="store", default="chromium",
+    parser.addoption("--test-browser", action="store", default="chromium",
                      choices=["chromium", "firefox", "webkit"],
                      help="Specify the browser to run tests on (chromium, firefox, webkit)")
 
@@ -73,7 +73,7 @@ async def search_url():
 @pytest_asyncio.fixture(scope="function")
 async def browser(metafunc):
     """Launches and manages a browser instance for each test."""
-    browser_name = metafunc.config.getoption("--browser")
+    browser_name = metafunc.config.getoption("--test-browser")
 
     async with async_playwright() as p:
         if browser_name == "chromium":

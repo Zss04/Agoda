@@ -22,7 +22,7 @@ test-job:
     - pip install -r requirements.txt
     - playwright install --with-deps
   script:
-    - pytest -v -s tests/ --browser=$BROWSER --html=Reports/report.html
+    - pytest -v -s tests/ --test-browser=$BROWSER --html=Reports/report.html
   artifacts:
     paths:
       - Reports/
