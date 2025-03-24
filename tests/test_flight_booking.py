@@ -12,7 +12,7 @@ async def test_flight_booking(page_tuple):
     # Locate and click on Flights tab
     await rt.click_flights()
     await rt.flights_is_clicked()
-    
+    await rt.close_popups()
     await rt.select_trip_type("roundTrip")
     await rt.set_departure_airport("LHE")
     await rt.set_arrival_airport("KHI")

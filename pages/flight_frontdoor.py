@@ -46,6 +46,8 @@ class test_roundTrip(basepage):
             return match.group(0)
         pytest.fail(f"No airport code found in text: '{text}'")
          
+    async def close_popups (self):
+        await self.click_element("//button[@data-element-name='prominent-app-download-floating-button']")
 
     async def select_airport_options(self, Airport_name):
         # Get options in airport list
@@ -108,7 +110,7 @@ class test_roundTrip(basepage):
         departure_date_str = departure_date.strftime("%Y-%m-%d")
         return_date_str = return_date.strftime("%Y-%m-%d")
 
-        await self.wait_for_element("//dix[@data-selenium='range-picker-date'")
+        await self.wait_for_element("//div[@data-selenium='range-picker-date'")
 
         departure_locator = await self.get_element(f"//span[@data-selenium-date='{departure_date_str}']")
         await departure_locator.click()
@@ -122,6 +124,7 @@ class test_roundTrip(basepage):
         ), f"could not select calender date {return_date_str}"
 
     async def set_passengers_and_cabin(self, adults=1, children=0, infants=0, cabin="Economy"):
+
         categories = {
             "adult": adults,
             "children": children,
@@ -132,7 +135,7 @@ class test_roundTrip(basepage):
             increase_btn = await self.get_element(f"//button[@data-element-name='flight-occupancy-{category}-increase']")
             decrease_btn = await self.get_element(f"//button[@data-element-name='flight-occupancy-{category}-decrease']")
             current_category_locator = await self.get_element(f"//span[@data-component='flight-occupancy-{category}-number']")
-            current_count_text = await current_category_locator.text_content()
+            current_count_text = await current_category_locator.inner_text()
             current_count = int(current_count_text)
 
             print(
