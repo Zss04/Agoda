@@ -30,7 +30,7 @@ class test_flightInfo (basepage) :
         print("Adults:", url_adults)
         print("Children:", url_children)
         print("Infants:", url_infants)
-
+ 
         await self.wait_for_element("//div[@data-testid='flight-origin-text-search']//input[@role='combobox']")
         search_departure_loc = await self.get_element(
             "//div[@data-testid='flight-origin-text-search']//input[@role='combobox']"
