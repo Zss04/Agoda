@@ -83,12 +83,16 @@ async def search_url():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def browser(metafunc):
+async def browser(request):
     """Launches and manages a browser instance for each test."""
+<<<<<<< HEAD
     browser_name = metafunc.config.getoption("--test-browser")
 <<<<<<< HEAD
     logger.info("Launching browser")
 =======
+=======
+    browser_name = request.config.getoption("--test-browser")
+>>>>>>> c7eb572 (added parallel execution)
 
 >>>>>>> 54584c9 (added parallel execution)
     async with async_playwright() as p:
