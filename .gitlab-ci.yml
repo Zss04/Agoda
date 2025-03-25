@@ -8,11 +8,21 @@ variables:
 build-job:
   stage: build
   script:
-    - echo "Build stage completed."
+    - pip install --upgrade pip
+    - pip install -r requirements.txt --target dependencies/  
+    - playwright install --with-deps 
+  artifacts:
+    paths:
+      - dependencies/  
+      - /root/.cache/ms-playwright/  
+    expire_in: 1 week  
 
 lint-job:
   stage: test
+  dependencies:
+    - build-job  
   script:
+    - pip install --no-index --find-links=dependencies/ -r requirements.txt
     - flake8 .
 
 test-job:
@@ -21,16 +31,13 @@ test-job:
   parallel:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
-
-  before_script:
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-    - playwright install --with-deps
+  dependencies:
+    - build-job
   script:
-    - pytest -v -s tests/ --test-browser=$BROWSER --headless=True --html=Reports/report.html
+    - pip install --no-index --find-links=dependencies/ -r requirements.txt  
+    - pytest -v -s tests/ --test-browser=$BROWSER --html=Reports/report_$BROWSER.html
   artifacts:
     paths:
       - Reports/
     when: always
     expire_in: 1 week
-
