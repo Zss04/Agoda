@@ -33,5 +33,5 @@ async def test_flight_stops(page_tuple):
     await page.goto(get_url["url"])
     
     assert await trip.flight_direct_stop(), f"Non direct flights found in direct filter"
-    # assert await trip.flight_one_stop(), f"Non one stop flights found in one stop filter"
+    assert await trip.flight_one_stop(), f"Non one stop flights found in one stop filter"
     # assert await trip.flight_two_plus_stop()
