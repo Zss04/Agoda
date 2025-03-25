@@ -10,6 +10,7 @@ variables:
 build-job:
   stage: build
   script:
+    - apt update && apt install -y python3.10-venv
     - python -m venv venv  # Create virtual environment
     - source venv/bin/activate  # Activate venv
     - pip install --upgrade pip
