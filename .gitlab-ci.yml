@@ -2,7 +2,7 @@ stages:
   - build
   - test
 
-image: mcr.microsoft.com/playwright/python:v1.51.0-noble
+image: python:3.12-slim
 
 variables:
   PYTHONPATH: "$CI_PROJECT_DIR/venv/lib/python3.10/site-packages"
@@ -10,21 +10,20 @@ variables:
 build-job:
   stage: build
   script:
-    - apt update && apt install -y python3.10-venv
-    - python -m venv venv  # Create virtual environment
-    - source venv/bin/activate  # Activate venv
+    - python3 -m venv venv  
+    - source venv/bin/activate  
     - pip install --upgrade pip
     - pip install -r requirements.txt
-    - playwright install --with-deps  # Install browsers in venv
+    - playwright install --with-deps  
   artifacts:
     paths:
-      - venv/  # Save the virtual environment
+      - venv/ 
     expire_in: 1 week
 
 lint-job:
   stage: test
   script:
-    - source venv/bin/activate  # Activate venv
+    - source venv/bin/activate  
     - flake8 .
 
 test-job:
@@ -34,7 +33,7 @@ test-job:
       - BROWSER: ["chromium", "firefox", "webkit"]
 
   script:
-    - source venv/bin/activate  # Activate venv
+    - source venv/bin/activate  
     - pytest -v -s tests/ --browser $BROWSER --html=Reports/report_$BROWSER.html
   artifacts:
     paths:
