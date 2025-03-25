@@ -2,10 +2,10 @@ stages:
   - build
   - test
 
-image: python:3.12-slim
+image: python:3.12-bookworm
 
 variables:
-  PYTHONPATH: "$CI_PROJECT_DIR/venv/lib/python3.10/site-packages"
+  PYTHONPATH: "$CI_PROJECT_DIR/venv/lib/python3.12/site-packages"
 
 build-job:
   stage: build
