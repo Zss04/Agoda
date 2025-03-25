@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
-from utils.logger_config import setup_logging, get_logger
+from utils.logger_config import setup_logging
 
 # Set up logging at the module level
 logger = setup_logging("conftest")
@@ -83,11 +83,10 @@ async def search_url():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def browser(metafunc):
+async def browser(request):
     """Launches and manages a browser instance for each test."""
-    browser_name = metafunc.config.getoption("--test-browser")
-    logger.info("Launching browser")
-    
+    browser_name = request.config.getoption("--test-browser")
+
     async with async_playwright() as p:
         if browser_name == "chromium":
             browser = await p.chromium.launch(headless=True)
