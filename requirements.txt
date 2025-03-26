@@ -1,5 +1,4 @@
-setuptools==68.2.2
-wheel==0.42.0
+setuptools==69.5.1
 pytest==8.3.4
 pytest-asyncio==0.25.3
 playwright==1.50.0
