@@ -1,4 +1,4 @@
-image: docker pull mcr.microsoft.com/playwright:v1.50.0-noble # Prebuilt Playwright image
+image: mcr.microsoft.com/playwright:v1.50.0-noble # Prebuilt Playwright image
 
 stages:
   - install
