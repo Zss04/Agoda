@@ -8,7 +8,6 @@ stages:
 install-job:
   stage: install
   script:
-    - pip install --upgrade pip setuptools wheel
     - pip install -r requirements.txt
     - playwright install --with-deps
   artifacts:
