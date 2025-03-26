@@ -1,44 +1,40 @@
+image: mcr.microsoft.com/playwright/python:v1.41.0-focal  # Prebuilt Playwright image
+
 stages:
-  - build
+  - install
+  - lint
   - test
 
-image: python:3.12-bookworm
-
-variables:
-  PYTHONPATH: "$CI_PROJECT_DIR/venv/lib/python3.12/site-packages"
-
-build-job:
-  stage: build
+install-job:
+  stage: install
   script:
-    - python3 -m venv venv  
-    - source venv/bin/activate  
-    - pip install --upgrade pip
+    - pip install --upgrade pip setuptools wheel
     - pip install -r requirements.txt
-    - playwright install --with-deps  
+    - playwright install --with-deps
   artifacts:
     paths:
-      - venv/ 
+      - .cache/pip  # ✅ Save installed packages
+      - .cache/ms-playwright  # ✅ Save downloaded Playwright browsers
     expire_in: 1 week
 
 lint-job:
-  stage: test
+  stage: lint
+  needs:
+    - install-job
   script:
-    - source venv/bin/activate  
     - flake8 .
 
 test-job:
   stage: test
   needs:
-    - lint-job
+    - install-job
   parallel:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
-
   script:
-    - source venv/bin/activate  
     - pytest -v -s tests/ --browser $BROWSER --html=Reports/report_$BROWSER.html
   artifacts:
     paths:
       - Reports/report_$BROWSER.html
-    when: always
+    when: on_failure
     expire_in: 1 week
