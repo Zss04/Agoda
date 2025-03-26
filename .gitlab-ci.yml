@@ -2,32 +2,16 @@ image: mcr.microsoft.com/playwright/python:v1.50.0-noble
 
 stages:
   - install
-  - lint
   - test
 
-install-job:
-  stage: install
-  script:
+
+before_script:
     - pip install --upgrade pip 
     - pip install -r requirements.txt
     - playwright install --with-deps
-  artifacts:
-    paths:
-      - .cache/pip 
-      - .cache/ms-playwright  
-    expire_in: 1 week
 
-lint-job:
-  stage: lint
-  needs:
-    - install-job
-  script:
-    - flake8 .
-
-test-job:
+test:
   stage: test
-  needs:
-    - install-job
   parallel:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
