@@ -22,8 +22,6 @@ build-job:
 
 lint-job:
   stage: test
-  requires:
-    - build-job
   script:
     - source venv/bin/activate  
     - flake8 .
