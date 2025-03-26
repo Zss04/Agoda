@@ -1,4 +1,4 @@
-image: mcr.microsoft.com/playwright:v1.50.0-noble # Prebuilt Playwright image
+image: mcr.microsoft.com/playwright/python:v1.50.0-noble 
 
 stages:
   - install
@@ -13,8 +13,8 @@ install-job:
     - playwright install --with-deps
   artifacts:
     paths:
-      - .cache/pip  # ✅ Save installed packages
-      - .cache/ms-playwright  # ✅ Save downloaded Playwright browsers
+      - .cache/pip 
+      - .cache/ms-playwright  
     expire_in: 1 week
 
 lint-job:
