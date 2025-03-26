@@ -16,7 +16,7 @@ test:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
   script:
-    - pytest -v -s tests/ --browser $BROWSER --html=Reports/report_$BROWSER.html
+    - pytest -v -s tests/ --browser=$BROWSER --html=Reports/report_$BROWSER.html
   artifacts:
     paths:
       - Reports/report_$BROWSER.html
