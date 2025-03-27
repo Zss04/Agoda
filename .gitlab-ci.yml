@@ -18,14 +18,14 @@ before_script:
 cache:
   paths:
     - node_modules/
-    
+
 test:
   stage: test
   parallel:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
   script:
-    - npm run test:all-browsers
+    - npm run test
   artifacts:
     paths:
       - Reports/report_$BROWSER.html
