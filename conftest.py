@@ -89,11 +89,11 @@ async def browser(request):
 
     async with async_playwright() as p:
         if browser_name == "chromium":
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=False)
         elif browser_name == "firefox":
-            browser = await p.firefox.launch(headless=True)
+            browser = await p.firefox.launch(headless=False)
         elif browser_name == "webkit":
-            browser = await p.webkit.launch(headless=True)
+            browser = await p.webkit.launch(headless=False)
         else:
             pytest.fail(f"Unsupported browser: {browser_name}")
         yield browser

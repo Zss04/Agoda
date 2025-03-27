@@ -6,3 +6,4 @@ venv/
 .idea/
 assets/
 Reports/
+node_modules/

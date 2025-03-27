@@ -48,9 +48,9 @@ class BasePage:
         logger.debug(f"Getting all elements with selector: '{selector}' (timeout: {timeout}ms)")
         try:
             await self.page.wait_for_selector(selector, timeout=timeout)
+            elements = await self.page.locator(selector).all()
             logger.debug(f"Found {len(elements)} elements with selector: '{selector}'")
-
-            return await self.page.locator(selector).all()
+            return elements
             
         except Exception as e:
             logger.warning(f"Elements '{selector}' not found. Error: {e}")

@@ -19,9 +19,9 @@ test:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
   script:
-    - pytest -v -s --testParameters tests/  --browser=$BROWSER --html=Reports/report_$BROWSER.html
+    - npm run test:all-browsers
   artifacts:
     paths:
       - Reports/report_$BROWSER.html
-    when: on_failure
+    when: always
     expire_in: 1 week
