@@ -9,11 +9,16 @@ variables:
 
 
 before_script:
+    - apt-get update && apt-get install -y nodejs npm
     - pip install --upgrade pip 
     - pip install -r requirements.txt
     - playwright install --with-deps
     - npm install
 
+cache:
+  paths:
+    - node_modules/
+    
 test:
   stage: test
   parallel:
