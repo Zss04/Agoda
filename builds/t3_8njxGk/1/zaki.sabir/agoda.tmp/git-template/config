@@ -1,0 +1,10 @@
+[init]
+	defaultBranch = none
+[fetch]
+	recurseSubmodules = false
+[credential]
+	interactive = never
+[transfer]
+	bundleURI = true
+[http "https://gitlab.arbisoft.com"]
+	sslCAInfo = /Users/zaki.sabir/Downloads/agoda/builds/t3_8njxGk/1/zaki.sabir/agoda.tmp/CI_SERVER_TLS_CA_FILE
