@@ -91,6 +91,9 @@ class FlightInfo(BasePage):
     async def get_no_results_page(self) -> Locator | None:
         return await self.get_element("//div[@data-testid='no-result-page']")
     
+    async def get_clicked_checkbox(self) -> Locator | None:
+        return await self.get_element("//label[@class='a83dd-box a83dd-fill-product-primary a83dd-text-product-primary a83dd-cursor-pointer a83dd-flex']")
+    
     async def validate_search(self, search_url) -> bool:
         logger.info("Validating search parameters")
         url = self.validate_url(search_url)
@@ -311,13 +314,14 @@ class FlightInfo(BasePage):
         await checkbox.click()
         logger.info(f"Clicked checkbox: {checkbox_getter.__name__}")
         
-        await self.wait_for_loaded_state()
 
     # Direct flights should only have 0 stops.
     async def flight_direct_stop(self) -> bool:
         logger.info("Checking direct flights")
         await self.check_no_flights_message()
         result = await self.process_flight_option(self.get_direct_stop_checkbox, [0])
+        await self.PlaywrightHelper.wait_1000()
+        await self.wait_for_loaded_state(state='networkidle')
         logger.info(f"Direct flights check result: {result}")
         return result
 
