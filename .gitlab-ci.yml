@@ -20,9 +20,6 @@ cache:
 
 test:
   stage: test
-  parallel:
-    matrix:
-      - BROWSER: ["chromium", "firefox", "webkit"]
   script:
     - npm run test:all-browsers
   artifacts:
