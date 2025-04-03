@@ -15,7 +15,9 @@ class FlightInfo(BasePage):
         super().__init__(page)
         self.helper  = PlaywrightHelper(page)
 
-    # Getters for UI elements
+    async def get_empty_space(self):
+        return await self.get_element("body")
+
     async def get_search_departure_loc(self) -> Locator | None:
         return await self.get_element("//div[@data-testid='flight-origin-text-search']//input[@role='combobox']")
         
@@ -166,7 +168,7 @@ class FlightInfo(BasePage):
         await return_calendar_button.click()
         logger.info("Clicked return calendar button")
 
-        await PlaywrightHelper.wait_1000(self)  
+        await self.helper.wait_1000()  
 
         return_date_element = await self.get_search_return_date()
         return_date = await return_date_element.get_attribute("data-selenium-date")
@@ -252,7 +254,9 @@ class FlightInfo(BasePage):
         """
         # Click the appropriate checkbox and wait for the page to load
         await self.click_checkbox_and_wait(checkbox_getter)
-        
+        await self.wait_for_loaded_state(state="domcontentloaded")
+        await self.helper.wait_1000()
+            
         if allowed_stops == [0]: 
             trip_stops = "direct" 
         elif allowed_stops == [0,1]:
@@ -263,6 +267,7 @@ class FlightInfo(BasePage):
         logger.info(f"Processing flight option: {trip_stops}")
         
         try:
+
             # Check each flight against the criteria
             flights_available = await self.get_flight_cards()
             logger.info(f"Number of stops for {trip_stops} are: ")
@@ -320,6 +325,7 @@ class FlightInfo(BasePage):
         checkbox = await checkbox_getter()
         await self.wait_for_element(checkbox)
         await checkbox.click()
+        await self.wait_for_loaded_state(state='domcontentloaded')
         logger.info(f"Clicked checkbox: {checkbox_getter.__name__}")
         
 
@@ -328,8 +334,6 @@ class FlightInfo(BasePage):
         logger.info("Checking direct flights")
         await self.check_no_flights_message()
         result = await self.process_flight_option(self.get_direct_stop_checkbox, [0])
-        await self.helper.wait_1000()
-        await self.wait_for_loaded_state(state='networkidle')
         logger.info(f"Direct flights check result: {result}")
         return result
 
@@ -337,8 +341,6 @@ class FlightInfo(BasePage):
     async def flight_one_stop(self) -> bool:
         logger.info("Checking one-stop flights")
         result = await self.process_flight_option(self.get_one_stop_checkbox, [0,1])
-        await self.helper.wait_1000()
-        await self.wait_for_loaded_state()
         logger.info(f"One-stop flights check result: {result}")
         return result
     

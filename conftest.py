@@ -86,7 +86,7 @@ async def search_url():
 async def browser(request):
     """Launches and manages a browser instance for each test."""
     browser_name = request.config.getoption("--test-browser")
-
+    
     async with async_playwright() as p:
         if browser_name == "chromium":
             browser = await p.chromium.launch(headless=True)
