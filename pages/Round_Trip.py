@@ -14,7 +14,7 @@ logger = get_logger("RoundTrip")
 class RoundTrip(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
-        self.PlaywrightHelper = PlaywrightHelper(page)
+        self.helper = PlaywrightHelper(page)
         logger.info("RoundTrip page object initialized")
 
     async def get_flights_frontdoor(self) -> Locator | None:
@@ -51,7 +51,7 @@ class RoundTrip(BasePage):
     async def get_departure_date(self , depart_arrive_date_str) -> Locator | None:
         get_departure_date_temp = self.get_departure_date_temp
         next_month_button = self.get_next_month_button
-        return await self.PlaywrightHelper.date_select_helper(get_departure_date_temp, next_month_button, depart_arrive_date_str)
+        return await self.helper.date_select_helper(get_departure_date_temp, next_month_button, depart_arrive_date_str)
 
     async def get_return_date_temp(self, return_date_str) -> Locator | None:
         return await self.get_element(f"//span[@data-selenium-date='{return_date_str}']")
@@ -59,7 +59,7 @@ class RoundTrip(BasePage):
     async def get_return_date (self, depart_arrive_date_str) -> Locator | None:
         get_arrival_date_temp = self.get_departure_date_temp
         next_month_button = self.get_next_month_button
-        return await self.PlaywrightHelper.date_select_helper(get_arrival_date_temp, next_month_button, depart_arrive_date_str)
+        return await self.helper.date_select_helper(get_arrival_date_temp, next_month_button, depart_arrive_date_str)
 
     async def get_selected_departure_date(self) -> Locator | None:
         return await self.get_element("//div[@data-component='flight-search-departureDate']")

@@ -13,12 +13,12 @@ from utils.common import PlaywrightHelper
 class FlightInfo(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
-    
+        self.helper  = PlaywrightHelper(page)
 
     # Getters for UI elements
     async def get_search_departure_loc(self) -> Locator | None:
         return await self.get_element("//div[@data-testid='flight-origin-text-search']//input[@role='combobox']")
-
+        
     async def get_search_arrival_loc(self) -> Locator | None:
         return await self.get_element("//div[@data-testid='flight-destination-text-search']//input[@role='combobox']")
 
@@ -52,7 +52,7 @@ class FlightInfo(BasePage):
     async def get_search_infants(self) -> Locator | None:
         return await self.get_element("//p[@data-component='infants-count']")
 
-    async def get_search_cabin_type(self) -> Locator | None:
+    async def get_search_cabin_type(self) -> Locator:
         return await self.get_element("//div[@data-element-name='flight-cabin-class']//p[@class='sc-jsMahE sc-kFuwaP bEtAca gEKgFh']")
 
     async def get_flight_cards(self) -> list[Locator]:
@@ -99,6 +99,9 @@ class FlightInfo(BasePage):
         url = self.validate_url(search_url)
         header = await self.validate_from_header()
 
+        # Check if results are available
+        await self.check_no_flights_message()
+
         for url_value, header_value in zip(url, header):
             url_value = (str(url_value)).replace(" ","").lower()
             header_value = (str(header_value)).replace(" ","").lower()
@@ -128,7 +131,7 @@ class FlightInfo(BasePage):
 
         # Extract departure and arrival locations
         await self.wait_for_loaded_state()
-        await PlaywrightHelper.wait_1000(self)
+        await self.helper.wait_1000()
 
         departure_input_element = await self.get_search_departure_loc()
         await self.wait_for_element(departure_input_element)
@@ -201,8 +204,7 @@ class FlightInfo(BasePage):
             list[list[str]]: A 2D array with flight information including carrier, duration, price, and layovers
         """
         logger.info("Collecting flight data")
-        # Check if results are available
-        await self.check_no_flights_message()
+
         
         # check all flight options and store headings in 2D array
         flight_loc = await self.get_flight_cards()
@@ -320,7 +322,7 @@ class FlightInfo(BasePage):
         logger.info("Checking direct flights")
         await self.check_no_flights_message()
         result = await self.process_flight_option(self.get_direct_stop_checkbox, [0])
-        await self.PlaywrightHelper.wait_1000()
+        await self.helper.wait_1000()
         await self.wait_for_loaded_state(state='networkidle')
         logger.info(f"Direct flights check result: {result}")
         return result

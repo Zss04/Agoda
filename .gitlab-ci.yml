@@ -24,7 +24,7 @@ test:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
   script:
-    - npm run test
+    - npm run test:all-browsers
   artifacts:
     paths:
       - Reports/report_$BROWSER.html

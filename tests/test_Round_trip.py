@@ -1,7 +1,6 @@
 import pytest
 from pages.Round_Trip import RoundTrip
 
-@pytest.mark.order(1)
 @pytest.mark.asyncio
 async def test_flight_booking(page_tuple, departure_airport, arrival_airport, adults, children, infants, cabin):
     page, set_url = page_tuple
