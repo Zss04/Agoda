@@ -9,9 +9,9 @@
 
   "scripts": {
     "test": "pytest -v -s --browser=$BROWSER --html=Reports/report_$BROWSER.html --testParameters tests/",
-    "test:chromium": "BROWSER=chromium npm run test",
-    "test:firefox": "BROWSER=firefox npm run test",
-    "test:webkit": "BROWSER=webkit npm run test",
+    "test:chromium": "env BROWSER=chromium npm run test",
+    "test:firefox": "env BROWSER=firefox npm run test",
+    "test:webkit": "env BROWSER=webkit npm run test",
     "test:all-browsers": "npm-run-all --parallel test:chromium test:firefox test:webkit"
   },
   "repository": {
