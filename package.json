@@ -8,7 +8,7 @@
   },
 
   "scripts": {
-    "test": "pytest -v -s --browser=$BROWSER --html=Reports/report_$BROWSER.html --testParameters tests/",
+    "test": "pytest -v -s --test-browser=$BROWSER --html=Reports/report_$BROWSER.html --testParameters tests/",
     "test:chromium": "env BROWSER=chromium npm run test",
     "test:firefox": "env BROWSER=firefox npm run test",
     "test:webkit": "env BROWSER=webkit npm run test",

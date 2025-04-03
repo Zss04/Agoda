@@ -52,11 +52,17 @@ class FlightInfo(BasePage):
     async def get_search_infants(self) -> Locator | None:
         return await self.get_element("//p[@data-component='infants-count']")
 
+    async def get_passengers_done_btn(self)->Locator:
+        return await self.get_element("//button[@data-element-name='flight-pax-apply-button']")
+
     async def get_search_cabin_type(self) -> Locator:
         return await self.get_element("//div[@data-element-name='flight-cabin-class']//p[@class='sc-jsMahE sc-kFuwaP bEtAca gEKgFh']")
 
     async def get_flight_cards(self) -> list[Locator]:
         return await self.get_elements("//div[contains(@data-testid, 'web-refresh-flights-card') and not(contains(@style, 'display: none'))]")
+
+    async def get_flights_card_expand_btn(self, flight) -> Locator:
+        return await self.get_element_child(flight , "//button[@data-testid='flight-detail-text-link']")
 
     async def get_flight_carrier(self, flight) -> Locator | None:
         return await self.get_element_child(flight, "//div[@data-testid='flightCard-flight-detail']//p[@class='sc-jsMahE sc-kFuwaP bEtAca ftblUM']")
@@ -185,7 +191,7 @@ class FlightInfo(BasePage):
         infants_element = await self.get_search_infants()
         infants_count = await infants_element.inner_text()
         header_data.append(infants_count)
-        logger.info(f"Infants count: {infants_count}")
+        logger.info(f"Infants count: {infants_count}")      
 
         # Extract cabin class type
         cabin_type_element = await self.get_search_cabin_type()
@@ -271,7 +277,7 @@ class FlightInfo(BasePage):
             return False
             
 
-    async def layover_count(self, flight, timeout=2000):
+    async def layover_count(self, flight, timeout=4000):
         """
         Gets the layover count for a flight.
         Uses multiple strategies to determine the correct count.
@@ -331,6 +337,8 @@ class FlightInfo(BasePage):
     async def flight_one_stop(self) -> bool:
         logger.info("Checking one-stop flights")
         result = await self.process_flight_option(self.get_one_stop_checkbox, [0,1])
+        await self.helper.wait_1000()
+        await self.wait_for_loaded_state()
         logger.info(f"One-stop flights check result: {result}")
         return result
     
