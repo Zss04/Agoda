@@ -58,7 +58,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//button[@data-element-name='flight-pax-apply-button']")
 
     async def get_search_cabin_type(self) -> Locator:
-        return await self.get_element("//div[@data-element-name='flight-cabin-class']//p[@class='sc-jsMahE sc-kFuwaP bEtAca gEKgFh']")
+        return await self.get_element("//div[@data-testid='cabin-class-selection']//button[@aria-selected='true']//p[@class, (contains, 'sc-jsMahE sc-kFuwaP kOCWkw')]")
 
     async def get_flight_cards(self) -> list[Locator]:
         return await self.get_elements("//div[contains(@data-testid, 'web-refresh-flights-card') and not(contains(@style, 'display: none'))]")
@@ -195,7 +195,10 @@ class FlightInfo(BasePage):
         header_data.append(infants_count)
         logger.info(f"Infants count: {infants_count}")      
 
+        passengers_done_btn = await self.get_passengers_done_btn()
+        await passengers_done_btn.click()
         # Extract cabin class type
+        
         cabin_type_element = await self.get_search_cabin_type()
         cabin_type = await cabin_type_element.inner_text()
         header_data.append(cabin_type)
