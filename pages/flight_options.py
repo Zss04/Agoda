@@ -58,7 +58,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//button[@data-element-name='flight-pax-apply-button']")
 
     async def get_search_cabin_type(self) -> Locator:
-        return await self.get_element("//div[@data-testid='cabin-class-selection']//button[@aria-selected='true']//p[@class, (contains, 'sc-jsMahE sc-kFuwaP kOCWkw')]")
+        return await self.get_element("//div[@data-testid='cabin-class-selection']//button[@aria-selected='true']//p[contains(@class, 'sc-jsMahE') and contains(@class, 'sc-kFuwaP') and contains(@class, 'kOCWkw')]")
 
     async def get_flight_cards(self) -> list[Locator]:
         return await self.get_elements("//div[contains(@data-testid, 'web-refresh-flights-card') and not(contains(@style, 'display: none'))]")
@@ -257,9 +257,10 @@ class FlightInfo(BasePage):
         """
         # Click the appropriate checkbox and wait for the page to load
         await self.click_checkbox_and_wait(checkbox_getter)
-        await self.wait_for_loaded_state(state="domcontentloaded")
+        await self.wait_for_loaded_state()
         await self.helper.wait_1000()
-            
+        initial_card_length = len(await self.get_flight_cards())
+
         if allowed_stops == [0]: 
             trip_stops = "direct" 
         elif allowed_stops == [0,1]:
@@ -268,18 +269,18 @@ class FlightInfo(BasePage):
             trip_stops = "2+ stops"
         
         logger.info(f"Processing flight option: {trip_stops}")
-        
-        try:
 
-            # Check each flight against the criteria
-            flights_available = await self.get_flight_cards()
-            logger.info(f"Number of stops for {trip_stops} are: ")
-            for flight in flights_available:
-                stops = await self.layover_count(flight)
-                logger.info(f"{stops}\n")
-                if stops not in allowed_stops:
-                    return False
-            return True
+        try:
+            while (initial_card_length!= flights_available):
+                flights_available = await self.get_flight_cards()
+                
+                logger.info(f"Number of stops for {trip_stops} are: ")
+                for flight in flights_available:
+                    stops = await self.layover_count(flight)
+                    logger.info(f"{stops}\n")
+                    if stops not in allowed_stops:
+                        return False
+                return True
         except Exception as e:
             logger.warning(f"warning processing flight option {trip_stops}: {e}")
             return False
