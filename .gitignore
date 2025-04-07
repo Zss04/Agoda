@@ -8,3 +8,5 @@ assets/
 Reports/
 node_modules/
 /builds/
+/.dockerignore
+/.env.*

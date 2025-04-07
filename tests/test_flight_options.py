@@ -14,6 +14,12 @@ async def test_verify_search_results(page_tuple):
     assert await trip.validate_search(get_url["url"])
     logger.info("search validated")
 
+@pytest.mark.asyncio
+async def test_flight_data(page_tuple):
+    page, get_url = page_tuple
+    trip = FlightInfo(page)
+    await page.goto(get_url["url"])
+
     flight_data_2d = await trip.flight_data()  # Call flight_data on the instance
     logger.info("\nFlight Data (Array):")
     # arranges all data in a table

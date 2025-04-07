@@ -58,8 +58,8 @@ class FlightInfo(BasePage):
         return await self.get_element("//button[@data-element-name='flight-pax-apply-button']")
 
     async def get_search_cabin_type(self) -> Locator:
-        return await self.get_element("//div[@data-testid='cabin-class-selection']//button[@aria-selected='true']//p[contains(@class, 'sc-jsMahE') and contains(@class, 'sc-kFuwaP') and contains(@class, 'kOCWkw')]")
-
+        return await self.get_element("//div[@data-element-name='flight-cabin-class']//p[@class='sc-jsMahE sc-kFuwaP bEtAca gEKgFh']")
+                                      
     async def get_flight_cards(self) -> list[Locator]:
         return await self.get_elements("//div[contains(@data-testid, 'web-refresh-flights-card') and not(contains(@style, 'display: none'))]")
 
@@ -103,13 +103,12 @@ class FlightInfo(BasePage):
         return await self.get_element("//label[@class='a83dd-box a83dd-fill-product-primary a83dd-text-product-primary a83dd-cursor-pointer a83dd-flex']")
     
     async def validate_search(self, search_url) -> bool:
+
+        await self.check_no_flights_message()
         logger.info("Validating search parameters")
         url = self.validate_url(search_url)
         header = await self.validate_from_header()
-
         # Check if results are available
-        await self.check_no_flights_message()
-
         for url_value, header_value in zip(url, header):
             url_value = (str(url_value)).replace(" ","").lower()
             header_value = (str(header_value)).replace(" ","").lower()
@@ -194,11 +193,8 @@ class FlightInfo(BasePage):
         infants_count = await infants_element.inner_text()
         header_data.append(infants_count)
         logger.info(f"Infants count: {infants_count}")      
-
-        passengers_done_btn = await self.get_passengers_done_btn()
-        await passengers_done_btn.click()
-        # Extract cabin class type
         
+        await self.helper.wait_1000()
         cabin_type_element = await self.get_search_cabin_type()
         cabin_type = await cabin_type_element.inner_text()
         header_data.append(cabin_type)
@@ -215,8 +211,7 @@ class FlightInfo(BasePage):
             list[list[str]]: A 2D array with flight information including carrier, duration, price, and layovers
         """
         logger.info("Collecting flight data")
-
-        
+        await self.check_no_flights_message()
         # check all flight options and store headings in 2D array
         flight_loc = await self.get_flight_cards()
         flight_data_2d = [["Carrier", "Duration", "Price", "Layovers"]]
@@ -257,9 +252,8 @@ class FlightInfo(BasePage):
         """
         # Click the appropriate checkbox and wait for the page to load
         await self.click_checkbox_and_wait(checkbox_getter)
-        await self.wait_for_loaded_state()
+        await self.wait_for_loaded_state(state='domcontentloaded')
         await self.helper.wait_1000()
-        initial_card_length = len(await self.get_flight_cards())
 
         if allowed_stops == [0]: 
             trip_stops = "direct" 
@@ -271,16 +265,15 @@ class FlightInfo(BasePage):
         logger.info(f"Processing flight option: {trip_stops}")
 
         try:
-            while (initial_card_length!= flights_available):
-                flights_available = await self.get_flight_cards()
-                
-                logger.info(f"Number of stops for {trip_stops} are: ")
-                for flight in flights_available:
-                    stops = await self.layover_count(flight)
-                    logger.info(f"{stops}\n")
-                    if stops not in allowed_stops:
-                        return False
-                return True
+            flights_available = await self.get_flight_cards()
+            
+            logger.info(f"Number of stops for {trip_stops} are: ")
+            for flight in flights_available:
+                stops = await self.layover_count(flight)
+                logger.info(f"{stops}\n")
+                if stops not in allowed_stops:
+                    return False
+            return True
         except Exception as e:
             logger.warning(f"warning processing flight option {trip_stops}: {e}")
             return False
