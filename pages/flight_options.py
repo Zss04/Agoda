@@ -227,20 +227,18 @@ class FlightInfo(BasePage):
         flight_data_2d = [["Carrier", "Duration", "Price", "Layovers"]]
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
         for flight in flight_loc:
+            await self.wait_for_loaded_state(state='domcontentloaded')
+            
             carrier_loc = await self.get_flight_carrier(flight)
-            await self.wait_for_element(carrier_loc)
             carrier = await carrier_loc.inner_text()
 
             duration_loc = await self.get_flight_duration(flight)
-            await self.wait_for_element(duration_loc)
             duration = await duration_loc.inner_text()
             
             price_loc = await self.get_flight_price(flight)
-            await self.wait_for_element(price_loc)
             price = await price_loc.inner_text()
             
             currency_loc = await self.get_flight_currency(flight)
-            await self.wait_for_element(currency_loc)
             currency = await currency_loc.inner_text()
             
             stops = await self.layover_count(flight)
