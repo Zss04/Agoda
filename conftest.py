@@ -89,7 +89,7 @@ async def browser(request):
     
     async with async_playwright() as p:
         if browser_name == "chromium":
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=False)
             logger.info(f"Launching browser: {browser_name}")
 
         elif browser_name == "firefox":

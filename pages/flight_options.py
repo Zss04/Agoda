@@ -91,7 +91,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//div[@data-component='TwoPlus']//label[@data-element-name='flight-filter-stops-item']")
     
     async def get_layover_count(self, flight) -> Locator | None:
-        return await self.get_element_child(flight, "//span[@class='sc-jsMahE sc-kFuwaP bEtAca fdKTiB']")
+        return await (await self.get_element_child(flight, "//span[@data-testid='layover']")).first()
         
     async def get_temp_title(self) -> Locator | None:
         return await self.get_element("//h2[@data-component='mob-flight-result-title']")
@@ -227,8 +227,7 @@ class FlightInfo(BasePage):
         flight_data_2d = [["Carrier", "Duration", "Price", "Layovers"]]
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
         for flight in flight_loc:
-            await self.wait_for_loaded_state(state='domcontentloaded')
-            
+            await self.wait_for_loaded_state(state='networkidle')
             carrier_loc = await self.get_flight_carrier(flight)
             carrier = await carrier_loc.inner_text()
 
