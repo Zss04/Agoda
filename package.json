@@ -9,6 +9,7 @@
 
   "scripts": {
     "test": "pytest -v -s --test-browser=$BROWSER --html=Reports/report_$BROWSER.html --testParameters tests/",
+    "test-docker": "pytest -v -s --test-browser=$BROWSER --html=Reports/report_$BROWSER.html --testParameters tests/",
     "test:chromium": "BROWSER=chromium npm run test",
     "test:firefox": "BROWSER=firefox npm run test",
     "test:webkit": "BROWSER=webkit npm run test",

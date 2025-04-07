@@ -14,7 +14,8 @@ RUN pip install --upgrade pip && \
 
 # Copy Node.js dependencies and install them
 COPY package*.json .
-RUN npm install
+RUN npm install 
+
 
 # Copy the rest of your project files
 COPY . .

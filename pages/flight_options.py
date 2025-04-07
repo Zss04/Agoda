@@ -61,7 +61,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//div[@data-element-name='flight-cabin-class']//p[@class='sc-jsMahE sc-kFuwaP bEtAca gEKgFh']")
                                       
     async def get_flight_cards(self) -> list[Locator]:
-        return await self.get_elements("//div[contains(@data-testid, 'web-refresh-flights-card') and not(contains(@style, 'display: none'))]")
+        return await self.get_elements("//div[@data-testid= 'web-refresh-flights-card']")
 
     async def get_flights_card_expand_btn(self, flight) -> Locator:
         return await self.get_element_child(flight , "//button[@data-testid='flight-detail-text-link']")
@@ -154,22 +154,26 @@ class FlightInfo(BasePage):
 
         # Open the departure calendar and get the selected departure date
         departure_calendar_button = await self.get_search_calender_departure()
+        await self.wait_for_element(departure_calendar_button)
         await departure_calendar_button.click()
         logger.info("Clicked departure calendar button")
 
         departure_date_element = await self.get_search_departure_date()
+        await self.wait_for_element(departure_date_element)
         departure_date = await departure_date_element.get_attribute("data-selenium-date")
         header_data.append(departure_date)
         logger.info(f"Departure date: {departure_date}")
 
         # Open the return calendar and get the selected return date
         return_calendar_button = await self.get_search_calender_arrival()
+        await self.wait_for_element(return_calendar_button)
         await return_calendar_button.click()
         logger.info("Clicked return calendar button")
 
         await self.helper.wait_1000()  
 
         return_date_element = await self.get_search_return_date()
+        await self.wait_for_element(return_date_element)
         return_date = await return_date_element.get_attribute("data-selenium-date")
         header_data.append(return_date)
         logger.info(f"Return date: {return_date}")
@@ -180,22 +184,28 @@ class FlightInfo(BasePage):
         logger.info("Clicked passenger dropdown")
 
         adults_element = await self.get_search_adults()
+        await self.wait_for_element(adults_element)
         adults_count = await adults_element.inner_text()
         header_data.append(adults_count)
         logger.info(f"Adults count: {adults_count}")
 
         children_element = await self.get_search_children()
+        await self.wait_for_element(children_element)
         children_count = await children_element.inner_text()
         header_data.append(children_count)
         logger.info(f"Children count: {children_count}")
 
         infants_element = await self.get_search_infants()
+        await self.wait_for_element(infants_element)
         infants_count = await infants_element.inner_text()
         header_data.append(infants_count)
         logger.info(f"Infants count: {infants_count}")      
         
+        await (await self.get_passengers_done_btn()).click()
+        
         await self.helper.wait_1000()
         cabin_type_element = await self.get_search_cabin_type()
+        await self.wait_for_element(cabin_type_element)
         cabin_type = await cabin_type_element.inner_text()
         header_data.append(cabin_type)
         logger.info(f"Cabin type: {cabin_type}")
@@ -218,15 +228,19 @@ class FlightInfo(BasePage):
         # gets details for all flights in flight instance on page until all flights on page have been stored in array
         for flight in flight_loc:
             carrier_loc = await self.get_flight_carrier(flight)
+            await self.wait_for_element(carrier_loc)
             carrier = await carrier_loc.inner_text()
 
             duration_loc = await self.get_flight_duration(flight)
+            await self.wait_for_element(duration_loc)
             duration = await duration_loc.inner_text()
             
             price_loc = await self.get_flight_price(flight)
+            await self.wait_for_element(price_loc)
             price = await price_loc.inner_text()
             
             currency_loc = await self.get_flight_currency(flight)
+            await self.wait_for_element(currency_loc)
             currency = await currency_loc.inner_text()
             
             stops = await self.layover_count(flight)

@@ -27,6 +27,6 @@ test:
     - npm run test
   artifacts:
     paths:
-      - Reports
+      - Reports/
     when: always
     expire_in: 1 week
