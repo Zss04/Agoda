@@ -11,12 +11,7 @@ before_script:
     - pip install --upgrade pip 
     - pip install -r requirements.txt
     - playwright install --with-deps
-    - apt-get update && apt-get install -y nodejs npm
-    - npm install
 
-cache:
-  paths:
-    - node_modules/
 
 test:
   stage: test
@@ -24,7 +19,7 @@ test:
     matrix:
       - BROWSER: ["chromium", "firefox", "webkit"]
   script:
-    - npm run test
+    - ./run_tests.sh
   artifacts:
     paths:
       - Reports/

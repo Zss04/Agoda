@@ -91,7 +91,7 @@ class FlightInfo(BasePage):
         return await self.get_element("//div[@data-component='TwoPlus']//label[@data-element-name='flight-filter-stops-item']")
     
     async def get_layover_count(self, flight) -> Locator | None:
-        return await (await self.get_element_child(flight, "//span[@data-testid='layover']")).first()
+        return await self.get_element_child(flight, "//div[@data-testid='flightCard-flight-detail']//span[@class='sc-jsMahE sc-kFuwaP bEtAca fdKTiB']")
         
     async def get_temp_title(self) -> Locator | None:
         return await self.get_element("//h2[@data-component='mob-flight-result-title']")
@@ -200,12 +200,8 @@ class FlightInfo(BasePage):
         infants_count = await infants_element.inner_text()
         header_data.append(infants_count)
         logger.info(f"Infants count: {infants_count}")      
-        
-        await (await self.get_passengers_done_btn()).click()
-        
-        await self.helper.wait_1000()
+                
         cabin_type_element = await self.get_search_cabin_type()
-        await self.wait_for_element(cabin_type_element)
         cabin_type = await cabin_type_element.inner_text()
         header_data.append(cabin_type)
         logger.info(f"Cabin type: {cabin_type}")

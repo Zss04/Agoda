@@ -7,24 +7,29 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 import pytest_html.extras
 from utils.logger_config import setup_logging
+from test_data import test_parameters
+
 
 # Set up logging at the module level
 logger = setup_logging("conftest")
 
 def pytest_addoption(parser):
     """Add command-line options for test parameters."""
-    parser.addoption("--testParameters", action="store", default=None,
-                    help="Use test parameters from package.json")
-    
+    parser.addoption("--origin", action="store", default="LHE",
+                    help="Use test parameters from test_data.py")
+    parser.addoption("--destination", action="store", default="IST",
+                    help="Use test parameters from test_data.py")
+    parser.addoption("--adults", action="store", default=1,
+                    help="Use test parameters from test_data.py")
+    parser.addoption("--children", action="store", default=0,
+                    help="Use test parameters from test_data.py")
+    parser.addoption("--infants", action="store", default=0,
+                    help="Use test parameters from test_data.py")
+    parser.addoption("--cabin", action="store", default="Economy",
+                    help="Use test parameters from test_data.py")  
     parser.addoption("--test-browser", action="store", default="chromium",
                      choices=["chromium", "firefox", "webkit"],
                      help="Specify the browser to run tests on (chromium, firefox, webkit)")
-
-def pytest_sessionstart(session):
-    """Called after the Session object has been created and before tests are collected."""
-    logger.info(f"Test session started: {session.config.rootdir}")
-   
-
 
 def pytest_generate_tests(metafunc):
     """
@@ -33,47 +38,17 @@ def pytest_generate_tests(metafunc):
     """
     # Check if the test function needs flight booking parameters
     if all(param in metafunc.fixturenames for param in 
-           ["departure_airport", "arrival_airport", "adults", "children", "infants", "cabin"]):
-        # Get parameters from the fixture
-        params = metafunc.config.getoption("--testParameters")
-        test_params = []
-        
-        if params:
-            # Use command line parameters if provided
-            try:
-                logger.info(f"Loading test parameters from package.json for {metafunc.function.__name__}")
-                project_root = os.path.dirname(os.path.abspath(__file__))
-                json_path = os.path.join(project_root, 'package.json')
-                
-                # Read the package.json file in read mode
-                with open(json_path, 'r') as f:
-                    data = json.load(f)
-                
-                # Check if 'testParameters' key exists in the JSON data
-                if 'testParameters' in data:
-                    test_params = [
-                        (
-                            param.get('origin', ''),
-                            param.get('destination', ''),
-                            param.get('adults', 1),
-                            param.get('children', 0),
-                            param.get('infants', 0),
-                            param.get('class', 'Economy')
-                        ) for param in data['testParameters']
-                    ]
-                    logger.info(f"Loaded {len(test_params)} parameter sets from package.json")
-                else:
-                    logger.warning("No 'testParameters' key found in package.json")
-            except Exception as e:
-                logger.error(f"Error loading parameters: {e}")
-        
-        # Parametrize the test function
-        metafunc.parametrize(
-            ["departure_airport", "arrival_airport", "adults", "children", "infants", "cabin"],
-            test_params
-        )
-        logger.info(f"Parametrized {metafunc.function.__name__} with {len(test_params)} parameter sets")
-
+        ["departure_airport", "arrival_airport", "adults", "children", "infants", "cabin"]):
+    # Get parameters from the test data
+        try:
+            metafunc.parametrize(
+                ["departure_airport", "arrival_airport", "adults", "children", "infants", "cabin"],
+                test_parameters
+            )
+            logger.info(f"Parametrized {metafunc.function.__name__} with {len(test_parameters)} parameter sets")
+        except Exception as e:
+            logger.error(f"Error loading parameters: {e}")
+    
 
 @pytest_asyncio.fixture(scope="session")
 async def search_url():
@@ -89,7 +64,7 @@ async def browser(request):
     
     async with async_playwright() as p:
         if browser_name == "chromium":
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(headless=True)
             logger.info(f"Launching browser: {browser_name}")
 
         elif browser_name == "firefox":
@@ -139,6 +114,7 @@ def create_screenshot_directory():
     Create the screenshot directory at the start of the session.
     Clears any existing screenshots to avoid accumulation.
     """
+   
     screenshot_dir = os.path.expanduser("~/Downloads/agoda/Reports/Images/")
     logger.info(f"Creating screenshot directory: {screenshot_dir}")
     os.makedirs(screenshot_dir, exist_ok=True)
