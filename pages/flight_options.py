@@ -201,10 +201,10 @@ class FlightInfo(BasePage):
         header_data.append(infants_count)
         logger.info(f"Infants count: {infants_count}")      
                 
-        cabin_type_element = await self.get_search_cabin_type()
-        cabin_type = await cabin_type_element.inner_text()
-        header_data.append(cabin_type)
-        logger.info(f"Cabin type: {cabin_type}")
+        # cabin_type_element = await self.get_search_cabin_type()
+        # cabin_type = await cabin_type_element.inner_text()
+        # header_data.append(cabin_type)
+        # logger.info(f"Cabin type: {cabin_type}")
 
         logger.info(f"Extracted from Header: {header_data}")
         return header_data
